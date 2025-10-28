@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pins</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="game-container">
+        <!-- Player 2 Score (Top, Inverted) -->
+        <div class="player-score-display player2-score-display" id="player2-indicator">
+            <span class="score-text" id="player2-score">0</span>
+        </div>
+
+        <div class="game-board">
+            <div class="game-grid-container">
+                <svg id="game-svg" viewBox="0 0 500 500">
+                    <!-- Grid dots and lines will be generated here -->
+                </svg>
+            </div>
+        </div>
+
+        <!-- Player 1 Score (Bottom) -->
+        <div class="player-score-display player1-score-display" id="player1-indicator">
+            <span class="score-text" id="player1-score">0</span>
+        </div>
+
+        <!-- Menu Button (Bottom Right) -->
+        <button class="menu-btn" id="menu-btn">☰</button>
+
+        <!-- Menu Modal -->
+        <div id="menu-modal" class="modal hidden">
+            <div class="modal-content menu-content">
+                <h2>Game Menu</h2>
+                <div class="menu-options">
+                    <button id="resume-btn" class="menu-option-btn">Resume Game</button>
+                    <button id="restart-game-btn" class="menu-option-btn">Restart Game</button>
+
+                    <div class="grid-size-section">
+                        <h3>Grid Size</h3>
+                        <div class="grid-size-options">
+                            <button class="grid-size-btn" data-size="5">5×5</button>
+                            <button class="grid-size-btn active" data-size="6">6×6</button>
+                            <button class="grid-size-btn" data-size="7">7×7</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div id="game-over-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="winner-text">Player 1 Wins!</h2>
+                <button id="play-again-btn" class="restart-btn">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
