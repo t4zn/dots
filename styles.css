@@ -517,7 +517,7 @@ circle {
     .menu-container-left {
         display: flex;
         position: fixed;
-        bottom: 15%;
+        bottom: 10%;
         left: 0;
         transform: translateY(50%);
         width: 30px;
