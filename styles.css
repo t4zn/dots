@@ -118,11 +118,11 @@ body.player2-turn::after {
     background: transparent;
     color: #636e72;
     padding: 2px;
-    font-weight: 600;
+    font-weight: 800;
     cursor: pointer;
     transition: all 0.2s ease;
     border: none;
-    font-size: 6px;
+    font-size: 8px;
     width: 12px;
     height: 16px;
     display: flex;
@@ -464,8 +464,8 @@ circle {
     .menu-btn {
         width: 18px;
         height: 18px;
-        font-size: 10px;
-        font-weight: 700;
+        font-size: 12px;
+        font-weight: 900;
     }
 
     .modal-content {
