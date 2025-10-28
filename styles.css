@@ -61,7 +61,7 @@ body.player2-turn::after {
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
-    opacity: 0.4;
+    opacity: 0;
     transition: all 0.3s ease;
     pointer-events: none;
 }
@@ -154,34 +154,35 @@ body.player2-turn::after {
     min-height: 250px;
 }
 
-.dot {
+/* Force dots to be solid black with maximum specificity */
+#game-svg .dot,
+#game-svg circle.dot,
+svg#game-svg .dot,
+svg#game-svg circle.dot,
+.dot,
+circle.dot {
     fill: #000000 !important;
-    cursor: pointer;
     stroke: none !important;
     stroke-width: 0 !important;
     opacity: 1 !important;
     color: #000000 !important;
+    cursor: default !important;
+    pointer-events: none !important;
 }
 
-.dot:hover {
-    fill: #000000 !important;
-    transform: scale(1.2);
-    color: #000000 !important;
-}
-
-circle.dot {
+.dot:hover,
+circle.dot:hover,
+#game-svg .dot:hover,
+#game-svg circle.dot:hover {
     fill: #000000 !important;
     stroke: none !important;
+    color: #000000 !important;
     opacity: 1 !important;
-}
-
-svg circle.dot {
-    fill: #000000 !important;
 }
 
 .line {
     stroke: #e9ecef;
-    stroke-width: 20;
+    stroke-width: 28;
     stroke-linecap: round;
     cursor: pointer;
     opacity: 0.4;
@@ -190,7 +191,7 @@ svg circle.dot {
 
 .line:hover {
     opacity: 0.8;
-    stroke-width: 24;
+    stroke-width: 32;
 }
 
 .line.player1-hover:hover {
@@ -205,7 +206,7 @@ svg circle.dot {
     opacity: 1;
     cursor: default;
     stroke: #2d3436;
-    stroke-width: 20;
+    stroke-width: 28;
 }
 
 .line.player1-line {
@@ -219,7 +220,7 @@ svg circle.dot {
 }
 
 .line.current-player-line {
-    stroke-width: 20;
+    stroke-width: 28;
 }
 
 .box {

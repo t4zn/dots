@@ -43,16 +43,14 @@ class PinsGame {
                 const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 dot.setAttribute('cx', offset + col * spacing);
                 dot.setAttribute('cy', offset + row * spacing);
-                dot.setAttribute('r', 6);
+                dot.setAttribute('r', 10);
                 dot.setAttribute('class', 'dot');
-                // Force solid black with inline styles
+                // Force solid black with multiple methods
                 dot.setAttribute('fill', '#000000');
                 dot.setAttribute('stroke', 'none');
                 dot.setAttribute('stroke-width', '0');
-                dot.style.fill = '#000000';
-                dot.style.stroke = 'none';
-                dot.style.opacity = '1';
-                dot.style.pointerEvents = 'none'; // Disable click events on dots
+                dot.removeAttribute('style'); // Remove any existing styles first
+                dot.style.cssText = 'fill: #000000 !important; stroke: none !important; opacity: 1 !important; pointer-events: none !important;';
                 svg.appendChild(dot);
             }
         }
@@ -61,7 +59,7 @@ class PinsGame {
         for (let row = 0; row < this.gridSize; row++) {
             for (let col = 0; col < this.gridSize - 1; col++) {
                 const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                const dotRadius = 6;
+                const dotRadius = 10;
                 const x1 = offset + col * spacing + dotRadius;
                 const y1 = offset + row * spacing;
                 const x2 = offset + (col + 1) * spacing - dotRadius;
@@ -88,7 +86,7 @@ class PinsGame {
         for (let row = 0; row < this.gridSize - 1; row++) {
             for (let col = 0; col < this.gridSize; col++) {
                 const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                const dotRadius = 6;
+                const dotRadius = 10;
                 const x1 = offset + col * spacing;
                 const y1 = offset + row * spacing + dotRadius;
                 const x2 = offset + col * spacing;
@@ -115,8 +113,8 @@ class PinsGame {
         for (let row = 0; row < this.gridSize - 1; row++) {
             for (let col = 0; col < this.gridSize - 1; col++) {
                 const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                const dotRadius = 6;
-                const lineWidth = 8; // Match the line stroke width
+                const dotRadius = 10;
+                const lineWidth = 28; // Match the line stroke width
                 const x = offset + col * spacing + dotRadius - (lineWidth / 2);
                 const y = offset + row * spacing + dotRadius;
                 const width = spacing - (dotRadius * 2) + lineWidth;
