@@ -10,6 +10,7 @@ class PinsGame {
         this.gameOver = false;
         this.gameStarted = false;
         this.turnTextTimeout = null; // Track timeout for turn text
+        this.colorTheme = 'blue-red'; // Default color theme
 
         this.initializeGame();
         this.setupEventListeners();
@@ -345,6 +346,19 @@ class PinsGame {
         });
     }
 
+    changeColorTheme(theme) {
+        this.colorTheme = theme;
+        document.body.setAttribute('data-theme', theme);
+
+        // Update active color theme button
+        document.querySelectorAll('.color-theme-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.theme === theme) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
     showMenu() {
         document.getElementById('menu-modal').classList.remove('hidden');
     }
@@ -379,6 +393,14 @@ class PinsGame {
             btn.addEventListener('click', () => {
                 const size = parseInt(btn.dataset.size);
                 this.changeGridSize(size);
+            });
+        });
+
+        // Color theme buttons
+        document.querySelectorAll('.color-theme-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+                this.changeColorTheme(theme);
             });
         });
 
