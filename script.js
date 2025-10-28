@@ -204,7 +204,7 @@ class PinsGame {
             this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
         }
 
-        this.updateUI();
+        this.updateUI(playerGetsAnotherTurn);
         this.checkGameEnd();
     }
 
@@ -232,7 +232,7 @@ class PinsGame {
         return completedBoxes;
     }
 
-    updateUI() {
+    updateUI(skipTurnDisplay = false) {
         // Old score displays removed - now using left score display only
 
         // Update left score display with both players' scores
@@ -246,8 +246,10 @@ class PinsGame {
         // Update body background based on current player
         document.body.className = `player${this.currentPlayer}-turn`;
 
-        // Show "Your Turn" display for 3 seconds
-        this.showTurnDisplay();
+        // Show "Your Turn" display only if player changed (not getting extra turn)
+        if (!skipTurnDisplay) {
+            this.showTurnDisplay();
+        }
     }
 
     showTurnDisplay() {
@@ -261,10 +263,10 @@ class PinsGame {
         // Show the display
         turnDisplay.classList.add('show');
 
-        // Hide after 2 seconds
+        // Hide after 1.3 seconds
         this.turnTextTimeout = setTimeout(() => {
             turnDisplay.classList.remove('show');
-        }, 2000);
+        }, 1300);
     }
 
     // Removed showTurnText function - no longer needed
