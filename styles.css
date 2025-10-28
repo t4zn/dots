@@ -880,3 +880,53 @@ body.player2-turn .turn-display {
         bottom: 6px;
     }
 }
+
+/* Game Over Modal - Premium Style */
+.game-over-content {
+    padding: 50px 40px 40px;
+    max-width: 400px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.game-over-content h2 {
+    font-size: 42px;
+    font-weight: 900;
+    margin-bottom: 30px;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.game-over-content .restart-btn {
+    margin-top: 10px;
+    padding: 16px 40px;
+    font-size: 16px;
+    font-weight: 800;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 6px 20px rgba(45, 52, 54, 0.25);
+}
+
+.game-over-content .restart-btn:hover {
+    box-shadow: 0 8px 25px rgba(45, 52, 54, 0.35);
+}
+
+@media (max-width: 480px) {
+    .game-over-content {
+        padding: 35px 28px 28px;
+        max-width: 320px;
+    }
+
+    .game-over-content h2 {
+        font-size: 28px;
+        margin-bottom: 24px;
+        letter-spacing: -0.5px;
+    }
+
+    .game-over-content .restart-btn {
+        padding: 14px 32px;
+        font-size: 14px;
+    }
+}
