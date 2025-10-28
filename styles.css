@@ -425,40 +425,40 @@ body[data-theme="pink-grey"] .player2-box {
 
 .modal-content {
     background: white;
-    padding: 40px;
-    border-radius: 20px;
+    padding: 30px;
+    border-radius: 25px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     max-width: 400px;
     width: 90%;
 }
 
 .menu-content {
-    max-width: 350px;
+    max-width: 380px;
 }
 
 .menu-options {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     margin-top: 20px;
 }
 
 .menu-option-btn {
-    background: #f1f2f6;
+    background: #f8f9fa;
     color: #2d3436;
     border: none;
     padding: 12px 24px;
-    border-radius: 25px;
-    font-size: 16px;
-    font-weight: 500;
+    border-radius: 15px;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .menu-option-btn:hover {
-    background: #ddd6fe;
-    color: #7c3aed;
+    background: #e9ecef;
+    transform: translateY(-1px);
 }
 
 .grid-size-section {
@@ -469,64 +469,68 @@ body[data-theme="pink-grey"] .player2-box {
 
 .grid-size-section h3 {
     color: #2d3436;
-    margin-bottom: 15px;
-    font-size: 18px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .grid-size-options {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .grid-size-btn {
-    background: #f1f2f6;
+    background: #f8f9fa;
     color: #636e72;
-    border: none;
+    border: 2px solid transparent;
     padding: 8px 16px;
-    border-radius: 20px;
+    border-radius: 12px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     min-width: 50px;
 }
 
 .grid-size-btn:hover {
-    background: #ddd6fe;
-    color: #7c3aed;
+    background: #e9ecef;
 }
 
 .grid-size-btn.active {
-    background: #3b82f6;
+    background: #2d3436;
     color: white;
 }
 
 .grid-size-btn.active:hover {
-    background: #2563eb;
+    background: #2d3436;
 }
 
 .modal-content h2 {
     color: #2d3436;
     margin-bottom: 20px;
-    font-size: 28px;
+    font-size: 24px;
+    font-weight: 700;
 }
 
 .restart-btn {
-    background: #e17055;
+    background: #2d3436;
     color: white;
     border: none;
-    padding: 12px 24px;
-    border-radius: 25px;
+    padding: 12px 28px;
+    border-radius: 15px;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .restart-btn:hover {
-    background: #d63031;
-    transform: translateY(-2px);
+    background: #636e72;
+    transform: translateY(-1px);
 }
 
 /* Responsive design */
@@ -735,19 +739,19 @@ body.player2-turn .turn-display {
         top: 15px;
     }
 }
-/* Colo
-r Theme Options */
+/* Color Theme Options */
 .color-theme-options {
     display: flex;
     gap: 10px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .color-theme-btn {
-    background: #f1f2f6;
+    background: #f8f9fa;
     border: 2px solid transparent;
     padding: 8px 12px;
-    border-radius: 20px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
@@ -757,7 +761,6 @@ r Theme Options */
 
 .color-theme-btn:hover {
     background: #e9ecef;
-    transform: scale(1.05);
 }
 
 .color-theme-btn.active {
@@ -766,8 +769,8 @@ r Theme Options */
 }
 
 .color-preview {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     border: 1px solid rgba(0, 0, 0, 0.1);
 }
