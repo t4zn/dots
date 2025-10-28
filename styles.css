@@ -171,35 +171,26 @@ body.player2-turn::after {
     min-height: 250px;
 }
 
-/* Force dots to be solid black with maximum specificity */
-#game-svg .dot,
-#game-svg circle.dot,
-svg#game-svg .dot,
-svg#game-svg circle.dot,
-.dot,
-circle.dot {
+/* Force solid black dots with maximum specificity */
+svg circle,
+#game-svg circle,
+svg#game-svg circle {
     fill: #000000 !important;
     stroke: none !important;
     stroke-width: 0 !important;
     opacity: 1 !important;
-    color: #000000 !important;
-    cursor: default !important;
     pointer-events: none !important;
 }
 
-.dot:hover,
-circle.dot:hover,
-#game-svg .dot:hover,
-#game-svg circle.dot:hover {
+/* Override any potential browser defaults */
+circle {
     fill: #000000 !important;
     stroke: none !important;
-    color: #000000 !important;
-    opacity: 1 !important;
 }
 
 .line {
     stroke: #e9ecef;
-    stroke-width: 28;
+    stroke-width: 20;
     stroke-linecap: round;
     cursor: pointer;
     opacity: 0.4;
@@ -208,7 +199,7 @@ circle.dot:hover,
 
 .line:hover {
     opacity: 0.8;
-    stroke-width: 32;
+    stroke-width: 24;
 }
 
 .line.player1-hover:hover {
@@ -223,7 +214,7 @@ circle.dot:hover,
     opacity: 1;
     cursor: default;
     stroke: #2d3436;
-    stroke-width: 28;
+    stroke-width: 20;
 }
 
 .line.player1-line {
@@ -237,7 +228,7 @@ circle.dot:hover,
 }
 
 .line.current-player-line {
-    stroke-width: 28;
+    stroke-width: 20;
 }
 
 .box {
