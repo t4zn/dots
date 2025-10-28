@@ -517,7 +517,7 @@ circle {
     .menu-container-left {
         display: flex;
         position: fixed;
-        bottom: 10%;
+        bottom: 6%;
         left: 0;
         transform: translateY(50%);
         width: 30px;
@@ -538,6 +538,16 @@ circle {
         width: 18px;
         height: 18px;
         font-size: 16px;
+        font-weight: 900;
+    }
+    
+    .score-p1,
+    .score-p2 {
+        font-weight: 900;
+    }
+    
+    .score-dot {
+        margin: 0 3px;
         font-weight: 900;
     }
 
