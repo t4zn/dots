@@ -117,11 +117,13 @@ class PinsGame {
             for (let col = 0; col < this.gridSize - 1; col++) {
                 const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                 const dotRadius = 16;
+                const gap = 2; // Gap between line and dot
                 const lineWidth = 20; // Match the line stroke width
-                const x = offset + col * spacing + dotRadius - (lineWidth / 2);
-                const y = offset + row * spacing + dotRadius;
-                const width = spacing - (dotRadius * 2) + lineWidth;
-                const height = spacing - (dotRadius * 2);
+                // Make boxes extend almost to the lines to eliminate white space
+                const x = offset + col * spacing + dotRadius + gap - 8;
+                const y = offset + row * spacing + dotRadius + gap - 8;
+                const width = spacing - (dotRadius + gap) * 2 + 16;
+                const height = spacing - (dotRadius + gap) * 2 + 16;
 
                 box.setAttribute('x', x);
                 box.setAttribute('y', y);
@@ -130,7 +132,7 @@ class PinsGame {
                 box.setAttribute('class', 'box');
                 box.setAttribute('data-row', row);
                 box.setAttribute('data-col', col);
-                box.setAttribute('rx', 8);
+                box.setAttribute('rx', 0);
                 box.style.pointerEvents = 'none'; // Disable click events on boxes
 
                 svg.appendChild(box);

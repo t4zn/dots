@@ -273,15 +273,15 @@ circle {
 }
 
 .box.filled {
-    opacity: 0.15;
+    opacity: 1;
 }
 
 .player1-box {
-    fill: #3b82f6;
+    fill: #60a5fa;
 }
 
 .player2-box {
-    fill: #ef4444;
+    fill: #f87171;
 }
 
 .player-color {
