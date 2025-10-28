@@ -37,25 +37,6 @@ class PinsGame {
 
         const offset = padding;
 
-        // Create dots - solid black circles
-        for (let row = 0; row < this.gridSize; row++) {
-            for (let col = 0; col < this.gridSize; col++) {
-                const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                dot.setAttribute('cx', offset + col * spacing);
-                dot.setAttribute('cy', offset + row * spacing);
-                dot.setAttribute('r', 16);
-                dot.setAttribute('fill', '#000000');
-                dot.setAttribute('stroke', 'none');
-                dot.setAttribute('stroke-width', '0');
-                dot.setAttribute('opacity', '1');
-                dot.style.fill = '#000000';
-                dot.style.stroke = 'none';
-                dot.style.opacity = '1';
-                dot.style.pointerEvents = 'none';
-                svg.appendChild(dot);
-            }
-        }
-
         // Create horizontal lines
         for (let row = 0; row < this.gridSize; row++) {
             for (let col = 0; col < this.gridSize - 1; col++) {
@@ -137,6 +118,25 @@ class PinsGame {
 
                 svg.appendChild(box);
                 this.boxes.push({ element: box, row, col, owner: null });
+            }
+        }
+
+        // Create dots last so they appear on top - solid black circles
+        for (let row = 0; row < this.gridSize; row++) {
+            for (let col = 0; col < this.gridSize; col++) {
+                const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                dot.setAttribute('cx', offset + col * spacing);
+                dot.setAttribute('cy', offset + row * spacing);
+                dot.setAttribute('r', 16);
+                dot.setAttribute('fill', '#000000');
+                dot.setAttribute('stroke', 'none');
+                dot.setAttribute('stroke-width', '0');
+                dot.setAttribute('opacity', '1');
+                dot.style.fill = '#000000';
+                dot.style.stroke = 'none';
+                dot.style.opacity = '1';
+                dot.style.pointerEvents = 'none';
+                svg.appendChild(dot);
             }
         }
     }
