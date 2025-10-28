@@ -246,9 +246,25 @@ class PinsGame {
         // Update body background based on current player
         document.body.className = `player${this.currentPlayer}-turn`;
 
-        // Player indicators removed - score now shown in left display only
+        // Show "Your Turn" display for 3 seconds
+        this.showTurnDisplay();
+    }
 
-        // No turn text needed anymore
+    showTurnDisplay() {
+        // Clear any existing timeout
+        if (this.turnTextTimeout) {
+            clearTimeout(this.turnTextTimeout);
+        }
+
+        const turnDisplay = document.getElementById('turn-display');
+
+        // Show the display
+        turnDisplay.classList.add('show');
+
+        // Hide after 2 seconds
+        this.turnTextTimeout = setTimeout(() => {
+            turnDisplay.classList.remove('show');
+        }, 2000);
     }
 
     // Removed showTurnText function - no longer needed

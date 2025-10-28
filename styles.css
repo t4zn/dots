@@ -551,6 +551,63 @@ circle {
     }
 }
 
+/* Your Turn Display */
+.turn-display {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    z-index: 500;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.turn-display.show {
+    opacity: 1;
+}
+
+body.player1-turn .turn-display {
+    bottom: 80px;
+    transform: translateX(-50%);
+}
+
+body.player2-turn .turn-display {
+    top: 80px;
+    transform: translateX(-50%) rotate(180deg);
+}
+
+@media (max-width: 768px) {
+    .turn-display {
+        font-size: 20px;
+    }
+    
+    body.player1-turn .turn-display {
+        bottom: 70px;
+    }
+    
+    body.player2-turn .turn-display {
+        top: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .turn-display {
+        font-size: 18px;
+    }
+    
+    body.player1-turn .turn-display {
+        bottom: 60px;
+    }
+    
+    body.player2-turn .turn-display {
+        top: 60px;
+    }
+}
+
 @media (max-height: 600px) {
     .game-board {
         padding: 2px;
