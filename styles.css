@@ -64,6 +64,7 @@ body.player2-turn::after {
     opacity: 0;
     transition: all 0.3s ease;
     pointer-events: none;
+    display: none;
 }
 
 .player1-score-display {
@@ -138,6 +139,41 @@ body.player2-turn::after {
     color: #7c3aed;
     transform: scale(1.1);
     border-color: #7c3aed;
+}
+
+/* Left menu button - hidden by default, shown on mobile */
+.menu-container-left {
+    display: none;
+}
+
+.score-display-left {
+    background: transparent;
+    padding: 2px;
+    font-weight: 800;
+    cursor: default;
+    border: none;
+    font-size: 12px;
+    width: 12px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    letter-spacing: 0.1px;
+    transform: rotate(90deg);
+}
+
+.score-p1 {
+    color: #3b82f6;
+}
+
+.score-dot {
+    color: #000000;
+    margin: 0 1px;
+}
+
+.score-p2 {
+    color: #ef4444;
 }
 
 .game-board {
@@ -465,6 +501,34 @@ circle {
         width: 18px;
         height: 18px;
         font-size: 12px;
+        font-weight: 900;
+    }
+
+    /* Show left menu button on mobile */
+    .menu-container-left {
+        display: flex;
+        position: fixed;
+        bottom: 15%;
+        left: 0;
+        transform: translateY(50%);
+        width: 30px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 0 30px 30px 0;
+        border: 1px solid #e9ecef;
+        border-left: none;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 6px;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        z-index: 100;
+    }
+    
+    .score-display-left {
+        width: 18px;
+        height: 18px;
+        font-size: 16px;
         font-weight: 900;
     }
 

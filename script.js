@@ -231,23 +231,20 @@ class PinsGame {
     }
 
     updateUI() {
-        document.getElementById('player1-score').textContent = this.scores.player1;
-        document.getElementById('player2-score').textContent = this.scores.player2;
+        // Old score displays removed - now using left score display only
+
+        // Update left score display with both players' scores
+        const scoreP1 = document.querySelector('.score-p1');
+        const scoreP2 = document.querySelector('.score-p2');
+        if (scoreP1 && scoreP2) {
+            scoreP1.textContent = this.scores.player1;
+            scoreP2.textContent = this.scores.player2;
+        }
 
         // Update body background based on current player
         document.body.className = `player${this.currentPlayer}-turn`;
 
-        // Update player indicators
-        const player1Indicator = document.getElementById('player1-indicator');
-        const player2Indicator = document.getElementById('player2-indicator');
-
-        if (this.currentPlayer === 1) {
-            player1Indicator.classList.add('active');
-            player2Indicator.classList.remove('active');
-        } else {
-            player2Indicator.classList.add('active');
-            player1Indicator.classList.remove('active');
-        }
+        // Player indicators removed - score now shown in left display only
 
         // No turn text needed anymore
     }
@@ -337,10 +334,12 @@ class PinsGame {
     }
 
     setupEventListeners() {
-        // Menu button
+        // Menu buttons
         document.getElementById('menu-btn').addEventListener('click', () => {
             this.showMenu();
         });
+
+        // Score button (no click functionality needed)
 
         // Menu options
         document.getElementById('resume-btn').addEventListener('click', () => {
