@@ -866,7 +866,7 @@ body.player2-turn .turn-display {
     bottom: 8px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 9px;
+    font-size: 11px;
     color: rgba(255, 255, 255, 0.5);
     font-weight: 500;
     letter-spacing: 0.3px;
@@ -876,7 +876,7 @@ body.player2-turn .turn-display {
 
 @media (max-width: 480px) {
     .copyright {
-        font-size: 8px;
+        font-size: 10px;
         bottom: 6px;
     }
 }
