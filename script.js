@@ -198,6 +198,11 @@ class PinsGame {
                 box.element.classList.add(`player${this.currentPlayer}-box`);
                 this.scores[`player${this.currentPlayer}`]++;
             });
+
+            // Auto-complete chain: check adjacent boxes only
+            setTimeout(() => {
+                this.autoCompleteChain(completedBoxes[0], lineId);
+            }, 300);
         }
 
         // Switch player if no boxes were completed
@@ -263,6 +268,136 @@ class PinsGame {
             line.classList.remove('player1-hover', 'player2-hover');
             line.classList.add(`player${this.currentPlayer}-hover`);
         });
+    }
+
+    autoCompleteChain(lastCompletedBox, lastDrawnLineId) {
+        if (!lastCompletedBox) return;
+
+        // Find adjacent boxes that need only one more line to complete
+        const { row, col } = lastCompletedBox;
+        const adjacentBoxes = [
+            { row: row - 1, col, sharedLine: `horizontal-${row}-${col}` }, // top
+            { row: row + 1, col, sharedLine: `horizontal-${row + 1}-${col}` }, // bottom
+            { row, col: col - 1, sharedLine: `vertical-${row}-${col}` }, // left
+            { row, col: col + 1, sharedLine: `vertical-${row}-${col + 1}` }  // right
+        ];
+
+        // Check each adjacent box
+        for (const adjPos of adjacentBoxes) {
+            const adjBox = this.boxes.find(b => b.row === adjPos.row && b.col === adjPos.col);
+            
+            if (!adjBox || adjBox.owner !== null) continue;
+
+            // Check if the shared line between boxes was already drawn before this turn
+            // If it was drawn before (black line), don't continue the chain through it
+            const sharedLineWasOld = this.drawnLines.has(adjPos.sharedLine) && 
+                                     adjPos.sharedLine !== lastDrawnLineId;
+            
+            if (sharedLineWasOld) {
+                // Check if this line was drawn by current player in this chain
+                const lineElement = document.querySelector(
+                    `.line[data-type="${adjPos.sharedLine.split('-')[0]}"][data-row="${adjPos.sharedLine.split('-')[1]}"][data-col="${adjPos.sharedLine.split('-')[2]}"]`
+                );
+                
+                // If the shared line is black (not current player's color), stop the chain
+                if (lineElement && lineElement.classList.contains('drawn') && 
+                    !lineElement.classList.contains('current-player-line')) {
+                    continue; // Don't continue chain through old lines
+                }
+            }
+
+            const requiredLines = [
+                `horizontal-${adjPos.row}-${adjPos.col}`,
+                `horizontal-${adjPos.row + 1}-${adjPos.col}`,
+                `vertical-${adjPos.row}-${adjPos.col}`,
+                `vertical-${adjPos.row}-${adjPos.col + 1}`
+            ];
+
+            const drawnCount = requiredLines.filter(lineId => this.lines.has(lineId)).length;
+            
+            if (drawnCount === 3) {
+                // This adjacent box needs only 1 more line - complete it
+                const requiredLinesData = [
+                    { id: `horizontal-${adjPos.row}-${adjPos.col}`, type: 'horizontal', row: adjPos.row, col: adjPos.col },
+                    { id: `horizontal-${adjPos.row + 1}-${adjPos.col}`, type: 'horizontal', row: adjPos.row + 1, col: adjPos.col },
+                    { id: `vertical-${adjPos.row}-${adjPos.col}`, type: 'vertical', row: adjPos.row, col: adjPos.col },
+                    { id: `vertical-${adjPos.row}-${adjPos.col + 1}`, type: 'vertical', row: adjPos.row, col: adjPos.col + 1 }
+                ];
+
+                const missingLine = requiredLinesData.find(line => !this.lines.has(line.id));
+
+                if (missingLine) {
+                    const lineElement = document.querySelector(
+                        `.line[data-type="${missingLine.type}"][data-row="${missingLine.row}"][data-col="${missingLine.col}"]`
+                    );
+
+                    if (lineElement && !lineElement.classList.contains('drawn')) {
+                        this.drawLineAuto(lineElement, adjBox, missingLine.id);
+                        return; // Only complete one box at a time in the chain
+                    }
+                }
+            }
+        }
+    }
+
+    drawLineAuto(lineElement, nextBox, lineId) {
+        const row = parseInt(lineElement.getAttribute('data-row'));
+        const col = parseInt(lineElement.getAttribute('data-col'));
+        const type = lineElement.getAttribute('data-type');
+        const fullLineId = `${type}-${row}-${col}`;
+
+        // Convert previous latest line to black if it exists
+        if (this.lastDrawnLine) {
+            this.lastDrawnLine.classList.remove('player1-line', 'player2-line', 'current-player-line');
+            this.lastDrawnLine.classList.add('drawn');
+        }
+
+        // Add line to drawn lines
+        this.lines.add(fullLineId);
+        this.drawnLines.set(fullLineId, this.currentPlayer);
+        this.lastDrawnLine = lineElement;
+
+        // Style the line
+        lineElement.classList.remove('player1-hover', 'player2-hover');
+        lineElement.classList.add(`player${this.currentPlayer}-line`, 'current-player-line', 'drawn');
+
+        // Animate
+        lineElement.style.transformOrigin = 'center';
+        lineElement.style.transform = 'scaleX(0)';
+        lineElement.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+
+        requestAnimationFrame(() => {
+            lineElement.style.transform = 'scaleX(1)';
+        });
+
+        setTimeout(() => {
+            lineElement.style.transition = '';
+            lineElement.style.transform = '';
+            lineElement.style.transformOrigin = '';
+        }, 250);
+
+        // Check for completed boxes
+        const completedBoxes = this.checkCompletedBoxes();
+
+        if (completedBoxes.length > 0) {
+            completedBoxes.forEach(box => {
+                box.owner = this.currentPlayer;
+                box.element.classList.add('filled');
+                box.element.classList.add(`player${this.currentPlayer}-box`);
+                this.scores[`player${this.currentPlayer}`]++;
+            });
+
+            this.updateUI(true); // Skip turn display
+
+            // Continue the chain with the newly completed box
+            setTimeout(() => {
+                this.autoCompleteChain(completedBoxes[0], fullLineId);
+            }, 300);
+        } else {
+            this.updateUI(true);
+        }
+
+        this.checkGameEnd();
     }
 
     showTurnDisplay() {
