@@ -11,9 +11,174 @@ class PinsGame {
         this.gameStarted = false;
         this.turnTextTimeout = null; // Track timeout for turn text
         this.colorTheme = 'blue-red'; // Default color theme
+        this.gameMode = '2player'; // '2player' or 'bot'
+        this.botThinking = false; // Track if bot is thinking
+        this.audioContext = null; // Audio context for sound effects
 
         this.initializeGame();
         this.setupEventListeners();
+        this.initAudio();
+    }
+
+    initAudio() {
+        // Initialize audio context on first user interaction
+        const initContext = () => {
+            if (!this.audioContext) {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    console.log('Audio context initialized');
+                } catch (e) {
+                    console.error('Failed to create audio context:', e);
+                }
+            }
+        };
+        
+        // Try to initialize on various user interactions
+        ['click', 'touchstart', 'keydown'].forEach(event => {
+            document.addEventListener(event, initContext, { once: true });
+        });
+    }
+
+    playSound(type) {
+        // Try to initialize audio context if not already done
+        if (!this.audioContext) {
+            try {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                return;
+            }
+        }
+        
+        // Resume context if suspended
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+
+        const ctx = this.audioContext;
+        const now = ctx.currentTime;
+
+        switch(type) {
+            case 'line':
+                // Quick pop sound for drawing a line
+                this.playLineSound(ctx, now);
+                break;
+            case 'box':
+                // Satisfying fill sound for completing a box
+                this.playBoxSound(ctx, now);
+                break;
+            case 'win':
+                // Victory fanfare
+                this.playWinSound(ctx, now);
+                break;
+        }
+    }
+
+    playLineSound(ctx, now) {
+        // Create a scratchy, sweeping sound like drawing on paper
+        const bufferSize = ctx.sampleRate * 0.25; // 250ms duration
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        // Generate white noise with envelope for scratchy sound
+        for (let i = 0; i < bufferSize; i++) {
+            const t = i / ctx.sampleRate;
+            // White noise
+            const noise = (Math.random() * 2 - 1) * 0.3;
+            // Envelope: quick attack, sustained, quick release
+            let envelope;
+            if (t < 0.02) {
+                envelope = t / 0.02; // Attack
+            } else if (t < 0.2) {
+                envelope = 1; // Sustain
+            } else {
+                envelope = (0.25 - t) / 0.05; // Release
+            }
+            data[i] = noise * envelope;
+        }
+        
+        const source = ctx.createBufferSource();
+        const filter = ctx.createBiquadFilter();
+        const gain = ctx.createGain();
+        
+        source.buffer = buffer;
+        
+        // High-pass filter for pencil/marker texture
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(800, now);
+        filter.Q.setValueAtTime(1, now);
+        
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        
+        gain.gain.setValueAtTime(0.12, now);
+        
+        source.start(now);
+        source.stop(now + 0.25);
+    }
+
+    playBoxSound(ctx, now) {
+        // Two-tone ascending sound for box completion
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc1.frequency.setValueAtTime(523, now); // C5
+        osc2.frequency.setValueAtTime(659, now + 0.08); // E5
+        
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.setValueAtTime(0.2, now + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        
+        osc1.start(now);
+        osc1.stop(now + 0.15);
+        osc2.start(now + 0.08);
+        osc2.stop(now + 0.25);
+    }
+
+    playWinSound(ctx, now) {
+        // Victory chord progression
+        const frequencies = [523, 659, 784]; // C-E-G major chord
+        
+        frequencies.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.frequency.setValueAtTime(freq, now);
+            osc.type = 'sine';
+            
+            const startTime = now + (i * 0.1);
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.15, startTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.6);
+            
+            osc.start(startTime);
+            osc.stop(startTime + 0.6);
+        });
+        
+        // Add a final high note
+        const finalOsc = ctx.createOscillator();
+        const finalGain = ctx.createGain();
+        
+        finalOsc.connect(finalGain);
+        finalGain.connect(ctx.destination);
+        
+        finalOsc.frequency.setValueAtTime(1047, now + 0.3); // C6
+        finalOsc.type = 'sine';
+        
+        finalGain.gain.setValueAtTime(0, now + 0.3);
+        finalGain.gain.linearRampToValueAtTime(0.2, now + 0.35);
+        finalGain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+        
+        finalOsc.start(now + 0.3);
+        finalOsc.stop(now + 0.8);
     }
 
     initializeGame() {
@@ -169,6 +334,9 @@ class PinsGame {
         lineElement.classList.remove('player1-hover', 'player2-hover');
         lineElement.classList.add(`player${this.currentPlayer}-line`, 'current-player-line', 'drawn');
 
+        // Play line draw sound
+        this.playSound('line');
+
         // Smooth center-outward animation using scale transform
         lineElement.style.transformOrigin = 'center';
         lineElement.style.transform = 'scaleX(0)';
@@ -192,6 +360,10 @@ class PinsGame {
 
         if (completedBoxes.length > 0) {
             playerGetsAnotherTurn = true;
+            
+            // Play box completion sound
+            this.playSound('box');
+            
             completedBoxes.forEach(box => {
                 box.owner = this.currentPlayer;
                 box.element.classList.add('filled');
@@ -380,6 +552,9 @@ class PinsGame {
         const completedBoxes = this.checkCompletedBoxes();
 
         if (completedBoxes.length > 0) {
+            // Play box completion sound
+            this.playSound('box');
+            
             completedBoxes.forEach(box => {
                 box.owner = this.currentPlayer;
                 box.element.classList.add('filled');
@@ -475,6 +650,9 @@ class PinsGame {
             winColorName = 'DRAW';
         }
 
+        // Play win sound
+        this.playSound('win');
+        
         // Show fullscreen win message
         winScreen.style.background = winColor;
         winText.innerHTML = `${winColorName}<br>WINS`;
