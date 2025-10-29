@@ -427,26 +427,64 @@ class PinsGame {
 
         if (claimedBoxes === totalPossibleBoxes) {
             this.gameOver = true;
-            this.showGameOverModal();
+            // Wait for last box fill animation to complete (400ms transition)
+            setTimeout(() => {
+                this.showGameOverModal();
+            }, 500);
         }
     }
 
     showGameOverModal() {
-        const modal = document.getElementById('game-over-modal');
-        const winnerText = document.getElementById('winner-text');
+        const winScreen = document.getElementById('win-screen');
+        const winText = document.getElementById('win-text');
+
+        let winningPlayer = null;
+        let winColor = '';
+        let winColorName = '';
 
         if (this.scores.player1 > this.scores.player2) {
-            winnerText.textContent = 'Player 1 Wins!';
-            winnerText.style.color = '#3b82f6';
+            winningPlayer = 1;
+            
+            // Get color based on theme
+            if (this.colorTheme === 'green-purple') {
+                winColor = '#10b981';
+                winColorName = 'GREEN';
+            } else if (this.colorTheme === 'pink-grey') {
+                winColor = '#ec4899';
+                winColorName = 'PINK';
+            } else {
+                winColor = '#3b82f6';
+                winColorName = 'BLUE';
+            }
         } else if (this.scores.player2 > this.scores.player1) {
-            winnerText.textContent = 'Player 2 Wins!';
-            winnerText.style.color = '#ef4444';
+            winningPlayer = 2;
+            
+            // Get color based on theme
+            if (this.colorTheme === 'green-purple') {
+                winColor = '#a855f7';
+                winColorName = 'PURPLE';
+            } else if (this.colorTheme === 'pink-grey') {
+                winColor = '#6b7280';
+                winColorName = 'GREY';
+            } else {
+                winColor = '#ef4444';
+                winColorName = 'RED';
+            }
         } else {
-            winnerText.textContent = "It's a Draw!";
-            winnerText.style.color = '#636e72';
+            winColor = '#636e72';
+            winColorName = 'DRAW';
         }
 
-        modal.classList.remove('hidden');
+        // Show fullscreen win message
+        winScreen.style.background = winColor;
+        winText.innerHTML = `${winColorName}<br>WINS`;
+        winScreen.classList.remove('hidden');
+
+        // Hide win screen after 2 seconds and restart game
+        setTimeout(() => {
+            winScreen.classList.add('hidden');
+            this.restartGame();
+        }, 2000);
     }
 
     restartGame() {

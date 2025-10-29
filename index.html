@@ -71,6 +71,7 @@
                     <div class="grid-size-section">
                         <h3>Grid Size</h3>
                         <div class="grid-size-options">
+                            <button class="grid-size-btn" data-size="2">2×2</button>
                             <button class="grid-size-btn" data-size="5">5×5</button>
                             <button class="grid-size-btn active" data-size="6">6×6</button>
                             <button class="grid-size-btn" data-size="7">7×7</button>
@@ -104,6 +105,13 @@
             <div class="modal-content game-over-content">
                 <h2 id="winner-text">Player 1 Wins!</h2>
                 <button id="play-again-btn" class="restart-btn">Play Again</button>
+            </div>
+        </div>
+
+        <!-- Win Screen Overlay -->
+        <div id="win-screen" class="win-screen hidden">
+            <div class="win-message">
+                <div class="win-text" id="win-text">RED<br>WINS</div>
             </div>
         </div>
     </div>

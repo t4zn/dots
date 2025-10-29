@@ -1012,3 +1012,58 @@ body.player2-turn .turn-display {
         font-size: 14px;
     }
 }
+
+/* Win Screen Overlay */
+.win-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+.win-screen.hidden {
+    display: none;
+}
+
+.win-message {
+    text-align: center;
+}
+
+.win-text {
+    font-size: 120px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    text-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    animation: winTextAppear 0.5s ease-out;
+}
+
+@keyframes winTextAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 768px) {
+    .win-text {
+        font-size: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .win-text {
+        font-size: 60px;
+    }
+}
