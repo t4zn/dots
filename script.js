@@ -167,7 +167,7 @@ class PinsGame {
 
         // Remove hover classes and add current player line class
         lineElement.classList.remove('player1-hover', 'player2-hover');
-        lineElement.classList.add(`player${this.currentPlayer}-line`, 'current-player-line');
+        lineElement.classList.add(`player${this.currentPlayer}-line`, 'current-player-line', 'drawn');
 
         // Smooth center-outward animation using scale transform
         lineElement.style.transformOrigin = 'center';
@@ -247,10 +247,22 @@ class PinsGame {
         // Update body background based on current player
         document.body.className = `player${this.currentPlayer}-turn`;
 
+        // Update hover classes for all undrawn lines
+        this.updateLineHoverClasses();
+
         // Show "Your Turn" display only if player changed (not getting extra turn)
         if (!skipTurnDisplay) {
             this.showTurnDisplay();
         }
+    }
+
+    updateLineHoverClasses() {
+        // Update hover classes for all lines that haven't been drawn yet
+        const lines = document.querySelectorAll('.line:not(.drawn)');
+        lines.forEach(line => {
+            line.classList.remove('player1-hover', 'player2-hover');
+            line.classList.add(`player${this.currentPlayer}-hover`);
+        });
     }
 
     showTurnDisplay() {
@@ -270,12 +282,7 @@ class PinsGame {
         }, 1300);
     }
 
-    // Removed showTurnText function - no longer needed
 
-    updateLineHover() {
-        // This function is no longer needed since we removed hover effects
-        // that were causing unwanted color changes
-    }
 
 
 
