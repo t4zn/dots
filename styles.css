@@ -1487,50 +1487,184 @@ body.player5-turn .turn-display {
     }
 }
 
+/* Settings Button - Show on Mobile, Hide on Desktop */
+.settings-btn {
+    display: flex !important; /* Show by default (mobile-first) */
+}
+
+@media (min-width: 769px) {
+    .settings-btn {
+        display: none !important; /* Hide on desktop */
+    }
+}
+
 /* Welcome Screen Options */
 .welcome-options {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 40px;
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
 .welcome-option-btn {
-    background: transparent;
-    color: #000000;
-    border: 1px solid #d1d5db;
-    padding: 16px 32px;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 500;
+    background: #f8f9fa;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+    padding: 20px 40px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 10px;
     text-align: center;
     letter-spacing: 0.3px;
+    min-height: 60px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.welcome-option-btn:hover {
-    border-color: #000000;
-    background: #000000;
+/* Single Player Button - Cyan theme */
+#play-computer-btn {
+    background: #06b6d4;
+    border-color: #06b6d4;
     color: #ffffff;
-    transform: translateY(-1px);
+}
+
+#play-computer-btn:hover {
+    background: #0891b2;
+    border-color: #0891b2;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.25);
+}
+
+/* Multiplayer Button - Red theme */
+#play-friends-btn {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: #ffffff;
+}
+
+#play-friends-btn:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+/* Online Button - Orange theme */
+#play-online-btn {
+    background: #f97316;
+    border-color: #f97316;
+    color: #ffffff;
+}
+
+#play-online-btn:hover {
+    background: #ea580c;
+    border-color: #ea580c;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
 }
 
 .welcome-option-btn:active {
     transform: translateY(0);
 }
 
+.welcome-option-btn svg {
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+
+.welcome-option-btn:hover svg {
+    transform: scale(1.05);
+}
+
+/* Icon colors - white for all buttons */
+#play-computer-btn svg,
+#play-friends-btn svg,
+#play-online-btn svg {
+    color: #ffffff;
+}
+
+/* Default: stroke for paths, no fill */
+#play-computer-btn svg path,
+#play-friends-btn svg path,
+#play-online-btn svg path {
+    stroke: currentColor !important;
+    fill: none !important;
+}
+
+/* Circles should be filled white (for heads and wifi dot) */
+#play-computer-btn svg circle,
+#play-friends-btn svg circle,
+#play-online-btn svg circle {
+    fill: currentColor !important;
+    stroke: none !important;
+}
+
+/* Download App Button */
+.download-app-btn {
+    background: #000000;
+    color: #ffffff;
+    border: 1px solid #000000;
+    padding: 16px 32px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    letter-spacing: 0.3px;
+    margin-top: 20px;
+}
+
+.download-app-btn:hover {
+    background: #1a1a1a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.download-app-btn:active {
+    transform: translateY(0);
+}
+
+/* Show download button on mobile, hide on desktop */
+@media (min-width: 769px) {
+    .download-app-btn {
+        display: none !important; /* Hide on desktop */
+    }
+}
+
+@media (max-width: 768px) {
+    .welcome-option-btn {
+        padding: 18px 36px;
+        font-size: 15px;
+        min-height: 56px;
+    }
+}
+
 @media (max-width: 480px) {
     .welcome-options {
-        gap: 10px;
+        gap: 12px;
     }
 
     .welcome-option-btn {
-        padding: 14px 24px;
+        padding: 16px 32px;
         font-size: 14px;
+        min-height: 52px;
+        border-radius: 40px;
     }
 }
 
@@ -2132,7 +2266,7 @@ Start Screen */
         border: none;
         width: 40px;
         height: 40px;
-        display: flex !important;
+        display: flex !important; /* Show by default (mobile-first) */
         align-items: center;
         justify-content: center;
         cursor: pointer;
