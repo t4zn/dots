@@ -994,22 +994,35 @@ body.player5-turn .turn-display {
 
     body.player1-turn .turn-display {
         bottom: 15%;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     body.player2-turn .turn-display {
         top: 15%;
+        left: 50%;
+        transform: translateX(-50%) rotate(180deg);
     }
 
     body.player3-turn .turn-display {
-        left: 20%;
+        bottom: 15%;
+        left: 50%;
+        top: auto;
+        right: auto;
+        transform: translateX(-50%);
     }
 
     body.player4-turn .turn-display {
-        right: 20%;
+        top: 15%;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%) rotate(180deg);
     }
 
     body.player5-turn .turn-display {
         bottom: 20%;
+        left: 50%;
+        transform: translateX(-50%);
     }
 }
 
@@ -1020,22 +1033,35 @@ body.player5-turn .turn-display {
 
     body.player1-turn .turn-display {
         bottom: 12%;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     body.player2-turn .turn-display {
         top: 12%;
+        left: 50%;
+        transform: translateX(-50%) rotate(180deg);
     }
 
     body.player3-turn .turn-display {
-        left: 18%;
+        bottom: 12%;
+        left: 50%;
+        top: auto;
+        right: auto;
+        transform: translateX(-50%);
     }
 
     body.player4-turn .turn-display {
-        right: 18%;
+        top: 12%;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%) rotate(180deg);
     }
 
     body.player5-turn .turn-display {
         bottom: 18%;
+        left: 50%;
+        transform: translateX(-50%);
     }
 }
 
