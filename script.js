@@ -733,7 +733,11 @@ class PinsGame {
             claimedBoxes += this.scores[`player${i}`] || 0;
         }
 
+        console.log(`Game end check: ${claimedBoxes}/${totalPossibleBoxes} boxes claimed`);
+        console.log('Current scores:', this.scores);
+
         if (claimedBoxes === totalPossibleBoxes) {
+            console.log('Game should end now');
             this.gameOver = true;
             // Wait for last box fill animation to complete (400ms transition)
             setTimeout(() => {
@@ -743,8 +747,18 @@ class PinsGame {
     }
 
     showGameOverModal() {
+        console.log('showGameOverModal called');
         const winScreen = document.getElementById('win-screen');
         const winText = document.getElementById('win-text');
+        
+        if (!winScreen) {
+            console.error('Win screen element not found');
+            return;
+        }
+        if (!winText) {
+            console.error('Win text element not found');
+            return;
+        }
 
         // Find winner(s)
         let maxScore = 0;
@@ -805,6 +819,7 @@ class PinsGame {
         
         // Set win text based on result
         if (winners.length === 1) {
+            const winningPlayer = winners[0];
             if (this.gameMode === 'bot') {
                 winText.innerHTML = winningPlayer === 1 ? 'YOU<br>WIN' : 'BOT<br>WINS';
             } else if (this.gameMode === 'online') {
