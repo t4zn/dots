@@ -30,8 +30,8 @@
                     <span>Multiplayer</span>
                 </button>
 
-                <button id="play-code-btn" class="welcome-option-btn">
-                    <span>Custom Game</span>
+                <button id="play-online-btn" class="welcome-option-btn">
+                    <span>Play Online</span>
                 </button>
             </div>
 
@@ -286,6 +286,218 @@
                     <button id="win-main-menu-btn" class="win-action-btn win-action-btn-secondary">Main Menu</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Online Play Screen -->
+    <div id="online-screen" class="start-screen hidden">
+        <div class="start-content">
+            <button id="online-back-btn" class="back-btn" aria-label="Back to main menu">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            
+            <div class="logo-container">
+                <img src="favicon.ico" alt="Dots & Boxes" class="logo-icon">
+            </div>
+            <h1 class="game-title">Play Online</h1>
+            <p class="game-subtitle">Create or join a room to play with friends</p>
+
+            <div class="divider"></div>
+
+            <div class="online-options">
+                <button id="create-room-btn" class="online-option-btn">
+                    <span>Create Room</span>
+                </button>
+
+                <button id="join-room-btn" class="online-option-btn">
+                    <span>Join Room</span>
+                </button>
+            </div>
+
+            <div class="start-footer">
+                <p>© 2025 Taizun. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Room Screen -->
+    <div id="create-room-screen" class="start-screen hidden">
+        <div class="start-content">
+            <button id="create-room-back-btn" class="back-btn" aria-label="Back to online menu">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            
+            <div class="logo-container">
+                <img src="favicon.ico" alt="Dots & Boxes" class="logo-icon">
+            </div>
+            <h1 class="game-title">Create Room</h1>
+            <p class="game-subtitle">Set up your game room</p>
+
+            <div class="divider"></div>
+
+            <div class="start-options">
+                <label class="grid-label">Number of Players</label>
+                <div class="player-count-selector">
+                    <button class="grid-arrow" id="room-player-prev" aria-label="Previous player count">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div class="grid-size-display" id="room-player-count-display">2</div>
+                    <button class="grid-arrow" id="room-player-next" aria-label="Next player count">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="start-options">
+                <label class="grid-label">Grid Size</label>
+                <div class="grid-size-selector">
+                    <button class="grid-arrow" id="room-grid-prev" aria-label="Previous size">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div class="grid-size-display" id="room-grid-size-display">6×6</div>
+                    <button class="grid-arrow" id="room-grid-next" aria-label="Next size">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button id="create-room-final-btn" class="start-btn">
+                <span>Create Room</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+
+            <div class="start-footer">
+                <p>© 2025 Taizun. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Room Screen -->
+    <div id="join-room-screen" class="start-screen hidden">
+        <div class="start-content">
+            <button id="join-room-back-btn" class="back-btn" aria-label="Back to online menu">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            
+            <div class="logo-container">
+                <img src="favicon.ico" alt="Dots & Boxes" class="logo-icon">
+            </div>
+            <h1 class="game-title">Join Room</h1>
+            <p class="game-subtitle">Enter the 4-letter room code</p>
+
+            <div class="divider"></div>
+
+            <div class="room-code-input-container">
+                <input type="text" id="room-code-input" class="room-code-input" placeholder="ABCD" maxlength="4" autocomplete="off">
+            </div>
+
+            <button id="join-room-final-btn" class="start-btn">
+                <span>Join Room</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+
+            <div class="start-footer">
+                <p>© 2025 Taizun. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Lobby Screen -->
+    <div id="room-lobby-screen" class="start-screen hidden">
+        <div class="start-content">
+            <button id="lobby-back-btn" class="back-btn" aria-label="Leave room">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            
+            <div class="logo-container">
+                <img src="favicon.ico" alt="Dots & Boxes" class="logo-icon">
+            </div>
+            <h1 class="game-title">Room Lobby</h1>
+            <p class="game-subtitle">Waiting for players to join...</p>
+
+            <div class="divider"></div>
+
+            <div class="room-info">
+                <div class="room-code-display">
+                    <span class="room-code-label">Room Code:</span>
+                    <button id="room-code-btn" class="room-code-btn">
+                        <span id="room-code-text">ABCD</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="m5 15-4-4 4-4"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="room-settings">
+                    <div class="room-setting">
+                        <span class="setting-label">Players:</span>
+                        <span id="lobby-player-info">1/2</span>
+                    </div>
+                    <div class="room-setting">
+                        <span class="setting-label">Grid Size:</span>
+                        <span id="lobby-grid-info">6×6</span>
+                    </div>
+                </div>
+
+                <div class="players-list">
+                    <h3>Players in Room:</h3>
+                    <div id="players-container">
+                        <!-- Players will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="lobby-status" id="lobby-status">
+                Waiting for more players...
+            </div>
+
+            <div class="start-footer">
+                <p>© 2025 Taizun. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Code Popup -->
+    <div id="room-code-popup" class="modal hidden">
+        <div class="modal-content room-code-popup-content">
+            <h2>Room Code</h2>
+            <div class="room-code-large" id="room-code-large">ABCD</div>
+            <p class="room-code-instruction">Share this code with your friends to join the room</p>
+            <button id="copy-room-code-btn" class="copy-code-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="m5 15-4-4 4-4"></path>
+                </svg>
+                Copy Code
+            </button>
+            <button id="close-room-code-popup" class="menu-option-btn">Close</button>
         </div>
     </div>
 

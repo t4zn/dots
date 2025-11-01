@@ -1704,6 +1704,284 @@ Start Screen */
         font-size: 13px;
     }
 
+    .online-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 40px;
+    }
+
+    .online-option-btn {
+        background: transparent;
+        color: #000000;
+        border: 1px solid #d1d5db;
+        padding: 16px 32px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        letter-spacing: 0.3px;
+    }
+
+    .online-option-btn:hover {
+        border-color: #000000;
+        background: #000000;
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .online-option-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Room Code Input */
+    .room-code-input-container {
+        margin-bottom: 40px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .room-code-input {
+        background: #f8f9fa;
+        border: 2px solid #e5e7eb;
+        padding: 16px 24px;
+        border-radius: 12px;
+        font-size: 24px;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        width: 200px;
+        transition: all 0.2s ease;
+    }
+
+    .room-code-input:focus {
+        outline: none;
+        border-color: #000000;
+        background: #ffffff;
+    }
+
+    .room-code-input::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+    }
+
+    /* Room Info */
+    .room-info {
+        margin-bottom: 30px;
+    }
+
+    .room-code-display {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .room-code-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
+    }
+
+    .room-code-btn {
+        background: #f8f9fa;
+        border: 2px solid #e5e7eb;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .room-code-btn:hover {
+        border-color: #000000;
+        background: #000000;
+        color: #ffffff;
+    }
+
+    .room-settings {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .room-setting {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .setting-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .players-list {
+        text-align: left;
+    }
+
+    .players-list h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .players-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .player-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 12px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+    }
+
+    .player-color-indicator {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .player-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .player-host {
+        font-size: 11px;
+        color: #6b7280;
+        background: #f3f4f6;
+        padding: 2px 6px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .lobby-status {
+        font-size: 14px;
+        color: #6b7280;
+        font-style: italic;
+        margin-bottom: 20px;
+    }
+
+    /* Room Code Popup */
+    .room-code-popup-content {
+        max-width: 350px;
+        text-align: center;
+    }
+
+    .room-code-large {
+        font-size: 48px;
+        font-weight: 900;
+        letter-spacing: 8px;
+        color: #000000;
+        margin: 20px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+    }
+
+    .room-code-instruction {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 20px;
+        line-height: 1.4;
+    }
+
+    .copy-code-btn {
+        background: #000000;
+        color: #ffffff;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .copy-code-btn:hover {
+        background: #1f2937;
+        transform: translateY(-1px);
+    }
+
+    .copy-code-btn.copied {
+        background: #10b981;
+    }
+
+    .copy-code-btn.copied:hover {
+        background: #059669;
+    }
+
+    @media (max-width: 480px) {
+        .online-options {
+            gap: 10px;
+        }
+
+        .online-option-btn {
+            padding: 14px 24px;
+            font-size: 14px;
+        }
+
+        .room-code-input {
+            font-size: 20px;
+            padding: 14px 20px;
+            width: 180px;
+            letter-spacing: 3px;
+        }
+
+        .room-code-large {
+            font-size: 36px;
+            letter-spacing: 6px;
+            padding: 16px;
+        }
+
+        .room-settings {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .room-setting {
+            flex-direction: row;
+            justify-content: space-between;
+        }
+    }
+
     .divider {
         margin: 30px auto;
     }

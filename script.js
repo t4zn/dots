@@ -19,6 +19,19 @@ class PinsGame {
         this.audioContext = null; // Audio context for sound effects
         this.soundEnabled = true; // Sound effects toggle
         
+        // Online multiplayer properties
+        this.isOnlineMode = false;
+        this.roomCode = null;
+        this.playerId = null;
+        this.isHost = false;
+        this.roomPlayers = [];
+        this.roomSettings = {
+            playerCount: 2,
+            gridSize: 6
+        };
+        this.gameState = null;
+        this.onlineGameStarted = false;
+        
         // Initialize scores for default player count
         for (let i = 1; i <= this.playerCount; i++) {
             this.scores[`player${i}`] = 0;
@@ -34,6 +47,7 @@ class PinsGame {
 
         this.setupEventListeners();
         this.initAudio();
+        this.cleanupOldRooms();
     }
 
     initAudio() {
@@ -347,6 +361,11 @@ class PinsGame {
             return;
         }
 
+        // In online mode, check if it's this player's turn
+        if (this.gameMode === 'online' && !this.makeOnlineMove(lineElement)) {
+            return;
+        }
+
         console.log('Drawing line for player:', this.currentPlayer);
         this.gameStarted = true;
 
@@ -420,6 +439,11 @@ class PinsGame {
 
         this.updateUI(playerGetsAnotherTurn);
         this.checkGameEnd();
+
+        // Sync game state in online mode
+        if (this.gameMode === 'online') {
+            this.syncGameState();
+        }
 
         // Trigger bot move if it's bot's turn (including extra turns)
         if (this.gameMode === 'bot' && this.currentPlayer === 2 && !this.gameOver && !this.botThinking) {
@@ -646,6 +670,9 @@ class PinsGame {
         // Update text based on game mode
         if (this.gameMode === 'bot') {
             turnDisplay.textContent = this.currentPlayer === 1 ? 'YOUR TURN' : "BOT'S TURN";
+        } else if (this.gameMode === 'online') {
+            const myPlayerNumber = this.roomPlayers.find(p => p.id === this.playerId)?.playerNumber;
+            turnDisplay.textContent = this.currentPlayer === myPlayerNumber ? 'YOUR TURN' : `PLAYER ${this.currentPlayer}'S TURN`;
         } else {
             turnDisplay.textContent = 'YOUR TURN';
         }
@@ -706,9 +733,12 @@ class PinsGame {
             const winningPlayer = winners[0];
             winColor = this.getPlayerColor(winningPlayer);
             
-            // Get color name - in bot mode, show YOU vs BOT (WINS is added by template)
+            // Get color name - in bot mode, show YOU vs BOT, in online mode show player names
             if (this.gameMode === 'bot') {
                 winColorName = winningPlayer === 1 ? 'YOU' : 'BOT';
+            } else if (this.gameMode === 'online') {
+                const myPlayerNumber = this.roomPlayers.find(p => p.id === this.playerId)?.playerNumber;
+                winColorName = winningPlayer === myPlayerNumber ? 'YOU' : `PLAYER ${winningPlayer}`;
             } else {
                 const colorNames = {
                     2: ['BLUE', 'RED'],
@@ -835,6 +865,483 @@ class PinsGame {
         document.getElementById('menu-modal').classList.add('hidden');
     }
 
+    // Online Multiplayer Methods
+    generateRoomCode() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let result = '';
+        for (let i = 0; i < 4; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    generatePlayerId() {
+        return 'player_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    cleanupOldRooms() {
+        // Clean up rooms older than 1 hour
+        const oneHour = 60 * 60 * 1000;
+        const now = Date.now();
+        
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('room_')) {
+                try {
+                    const roomData = JSON.parse(localStorage.getItem(key));
+                    if (roomData && roomData.created && (now - roomData.created) > oneHour) {
+                        localStorage.removeItem(key);
+                        i--; // Adjust index since we removed an item
+                    }
+                } catch (e) {
+                    // Invalid room data, remove it
+                    localStorage.removeItem(key);
+                    i--;
+                }
+            }
+        }
+    }
+
+    createRoom() {
+        this.roomCode = this.generateRoomCode();
+        this.playerId = this.generatePlayerId();
+        this.isHost = true;
+        this.isOnlineMode = true;
+        
+        // Initialize room with host player
+        this.roomPlayers = [{
+            id: this.playerId,
+            name: 'You',
+            isHost: true,
+            playerNumber: 1
+        }];
+        
+        // Store room data in localStorage (simulating server)
+        const roomData = {
+            code: this.roomCode,
+            host: this.playerId,
+            players: this.roomPlayers,
+            settings: {
+                playerCount: this.roomSettings.playerCount,
+                gridSize: this.roomSettings.gridSize
+            },
+            gameState: null,
+            gameStarted: false,
+            currentPlayer: 1,
+            created: Date.now()
+        };
+        
+        localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
+        
+        this.showRoomLobby();
+    }
+
+    joinRoom(roomCode) {
+        const roomData = this.getRoomData(roomCode);
+        
+        if (!roomData) {
+            alert('Room not found! Please check the room code.');
+            return false;
+        }
+        
+        if (roomData.players.length >= roomData.settings.playerCount) {
+            alert('Room is full!');
+            return false;
+        }
+        
+        if (roomData.gameStarted) {
+            alert('Game has already started!');
+            return false;
+        }
+        
+        this.roomCode = roomCode;
+        this.playerId = this.generatePlayerId();
+        this.isHost = false;
+        this.isOnlineMode = true;
+        this.roomSettings = roomData.settings;
+        
+        // Add player to room
+        const newPlayer = {
+            id: this.playerId,
+            name: `Player ${roomData.players.length + 1}`,
+            isHost: false,
+            playerNumber: roomData.players.length + 1
+        };
+        
+        roomData.players.push(newPlayer);
+        this.roomPlayers = roomData.players;
+        
+        // Update room data
+        localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
+        
+        this.showRoomLobby();
+        return true;
+    }
+
+    getRoomData(roomCode) {
+        const data = localStorage.getItem(`room_${roomCode}`);
+        return data ? JSON.parse(data) : null;
+    }
+
+    updateRoomData(updates) {
+        const roomData = this.getRoomData(this.roomCode);
+        if (roomData) {
+            Object.assign(roomData, updates);
+            localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
+        }
+    }
+
+    leaveRoom() {
+        if (!this.roomCode) return;
+        
+        const roomData = this.getRoomData(this.roomCode);
+        if (roomData) {
+            // Remove player from room
+            roomData.players = roomData.players.filter(p => p.id !== this.playerId);
+            
+            if (roomData.players.length === 0) {
+                // Delete empty room
+                localStorage.removeItem(`room_${this.roomCode}`);
+            } else {
+                // If host left, make next player host
+                if (this.isHost && roomData.players.length > 0) {
+                    roomData.players[0].isHost = true;
+                    roomData.host = roomData.players[0].id;
+                }
+                localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
+            }
+        }
+        
+        this.resetOnlineState();
+    }
+
+    resetOnlineState() {
+        this.isOnlineMode = false;
+        this.roomCode = null;
+        this.playerId = null;
+        this.isHost = false;
+        this.roomPlayers = [];
+        this.gameState = null;
+        this.onlineGameStarted = false;
+    }
+
+    startOnlineGame() {
+        if (!this.isHost) return;
+        
+        const roomData = this.getRoomData(this.roomCode);
+        if (!roomData) return;
+        
+        if (roomData.players.length !== roomData.settings.playerCount) {
+            alert(`Need ${roomData.settings.playerCount} players to start!`);
+            return;
+        }
+        
+        // Initialize game state
+        this.playerCount = roomData.settings.playerCount;
+        this.gridSize = roomData.settings.gridSize;
+        this.gameMode = 'online';
+        this.onlineGameStarted = true;
+        
+        // Initialize scores for all players
+        this.scores = {};
+        for (let i = 1; i <= this.playerCount; i++) {
+            this.scores[`player${i}`] = 0;
+        }
+        
+        // Mark game as started
+        roomData.gameStarted = true;
+        roomData.gameState = {
+            currentPlayer: 1,
+            scores: this.scores,
+            lines: [],
+            drawnLines: {},
+            boxes: []
+        };
+        
+        this.updateRoomData(roomData);
+        
+        // Start the game
+        document.getElementById('room-lobby-screen').classList.add('hidden');
+        document.querySelector('.game-container').classList.remove('hidden');
+        this.initializeGame();
+        
+        // Start polling for game updates
+        if (this.lobbyInterval) {
+            clearInterval(this.lobbyInterval);
+        }
+        this.gameInterval = setInterval(() => {
+            this.pollForUpdates();
+        }, 500);
+    }
+
+    makeOnlineMove(lineElement) {
+        if (!this.isOnlineMode || !this.onlineGameStarted) return false;
+        
+        const roomData = this.getRoomData(this.roomCode);
+        if (!roomData) return false;
+        
+        // Check if it's this player's turn
+        const myPlayerNumber = this.roomPlayers.find(p => p.id === this.playerId)?.playerNumber;
+        if (roomData.gameState.currentPlayer !== myPlayerNumber) {
+            alert("It's not your turn!");
+            return false;
+        }
+        
+        return true;
+    }
+
+    syncGameState() {
+        if (!this.isOnlineMode) return;
+        
+        const roomData = this.getRoomData(this.roomCode);
+        if (!roomData || !roomData.gameState) return;
+        
+        // Update game state to server
+        roomData.gameState = {
+            currentPlayer: this.currentPlayer,
+            scores: this.scores,
+            lines: Array.from(this.lines),
+            drawnLines: Object.fromEntries(this.drawnLines),
+            gameOver: this.gameOver
+        };
+        
+        this.updateRoomData(roomData);
+    }
+
+    pollForUpdates() {
+        if (!this.isOnlineMode || !this.onlineGameStarted) return;
+        
+        const roomData = this.getRoomData(this.roomCode);
+        if (!roomData || !roomData.gameState) return;
+        
+        // Check for game state changes from other players
+        const serverState = roomData.gameState;
+        
+        // Update current player
+        if (serverState.currentPlayer !== this.currentPlayer) {
+            this.currentPlayer = serverState.currentPlayer;
+            this.updateUI();
+        }
+        
+        // Update scores
+        if (JSON.stringify(serverState.scores) !== JSON.stringify(this.scores)) {
+            this.scores = { ...serverState.scores };
+            this.updateUI();
+        }
+        
+        // Update lines (simplified - in real implementation would need more sophisticated sync)
+        if (serverState.lines.length !== this.lines.size) {
+            // Redraw game state
+            this.loadGameState(serverState);
+        }
+    }
+
+    loadGameState(gameState) {
+        // Load lines
+        this.lines = new Set(gameState.lines);
+        this.drawnLines = new Map(Object.entries(gameState.drawnLines));
+        
+        // Redraw all lines
+        document.querySelectorAll('.line').forEach(line => {
+            const row = parseInt(line.getAttribute('data-row'));
+            const col = parseInt(line.getAttribute('data-col'));
+            const type = line.getAttribute('data-type');
+            const lineId = `${type}-${row}-${col}`;
+            
+            if (this.lines.has(lineId)) {
+                const playerNum = this.drawnLines.get(lineId);
+                line.classList.add('drawn', `player${playerNum}-line`);
+            }
+        });
+        
+        // Update boxes
+        this.checkCompletedBoxes();
+        this.updateUI();
+    }
+
+    showOnlineScreen() {
+        // Hide all screens first
+        document.getElementById('welcome-screen').classList.add('hidden');
+        document.getElementById('create-room-screen').classList.add('hidden');
+        document.getElementById('join-room-screen').classList.add('hidden');
+        document.getElementById('room-lobby-screen').classList.add('hidden');
+        
+        // Show online screen
+        document.getElementById('online-screen').classList.remove('hidden');
+    }
+
+    showCreateRoomScreen() {
+        document.getElementById('online-screen').classList.add('hidden');
+        document.getElementById('create-room-screen').classList.remove('hidden');
+        
+        // Set up back button listener when screen is shown
+        const backBtn = document.getElementById('create-room-back-btn');
+        if (backBtn) {
+            // Remove any existing listeners
+            backBtn.replaceWith(backBtn.cloneNode(true));
+            const newBackBtn = document.getElementById('create-room-back-btn');
+            newBackBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showOnlineScreen();
+            });
+        }
+        
+        // Set up navigation buttons
+        this.setupCreateRoomButtons();
+    }
+
+    showJoinRoomScreen() {
+        document.getElementById('online-screen').classList.add('hidden');
+        document.getElementById('join-room-screen').classList.remove('hidden');
+        
+        // Set up back button listener when screen is shown
+        const backBtn = document.getElementById('join-room-back-btn');
+        if (backBtn) {
+            // Remove any existing listeners
+            backBtn.replaceWith(backBtn.cloneNode(true));
+            const newBackBtn = document.getElementById('join-room-back-btn');
+            newBackBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showOnlineScreen();
+            });
+        }
+        
+        // Set up join room buttons
+        this.setupJoinRoomButtons();
+    }
+
+    showRoomLobby() {
+        document.getElementById('create-room-screen').classList.add('hidden');
+        document.getElementById('join-room-screen').classList.add('hidden');
+        document.getElementById('room-lobby-screen').classList.remove('hidden');
+        
+        // Set up back button listener when screen is shown
+        const backBtn = document.getElementById('lobby-back-btn');
+        if (backBtn) {
+            // Remove any existing listeners
+            backBtn.replaceWith(backBtn.cloneNode(true));
+            const newBackBtn = document.getElementById('lobby-back-btn');
+            newBackBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.leaveRoom();
+                this.showOnlineScreen();
+            });
+        }
+        
+        // Set up room code button listener
+        const roomCodeBtn = document.getElementById('room-code-btn');
+        if (roomCodeBtn) {
+            roomCodeBtn.replaceWith(roomCodeBtn.cloneNode(true));
+            const newRoomCodeBtn = document.getElementById('room-code-btn');
+            newRoomCodeBtn.addEventListener('click', () => {
+                document.getElementById('room-code-popup').classList.remove('hidden');
+            });
+        }
+        
+        this.updateLobbyDisplay();
+        
+        // Start polling for room updates
+        this.lobbyInterval = setInterval(() => {
+            this.updateLobbyDisplay();
+        }, 1000);
+    }
+
+    updateLobbyDisplay() {
+        const roomData = this.getRoomData(this.roomCode);
+        if (!roomData) {
+            this.leaveRoom();
+            this.returnToWelcome();
+            return;
+        }
+        
+        // Update room code display
+        document.getElementById('room-code-text').textContent = this.roomCode;
+        document.getElementById('room-code-large').textContent = this.roomCode;
+        
+        // Update player info
+        document.getElementById('lobby-player-info').textContent = 
+            `${roomData.players.length}/${roomData.settings.playerCount}`;
+        
+        // Update grid info
+        document.getElementById('lobby-grid-info').textContent = 
+            `${roomData.settings.gridSize}×${roomData.settings.gridSize}`;
+        
+        // Update players list
+        const playersContainer = document.getElementById('players-container');
+        playersContainer.innerHTML = '';
+        
+        roomData.players.forEach((player, index) => {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player-item';
+            
+            const colorIndicator = document.createElement('div');
+            colorIndicator.className = 'player-color-indicator';
+            colorIndicator.style.backgroundColor = this.playerColors[roomData.settings.playerCount][index];
+            
+            const playerName = document.createElement('span');
+            playerName.className = 'player-name';
+            playerName.textContent = player.id === this.playerId ? 'You' : player.name;
+            
+            playerDiv.appendChild(colorIndicator);
+            playerDiv.appendChild(playerName);
+            
+            if (player.isHost) {
+                const hostBadge = document.createElement('span');
+                hostBadge.className = 'player-host';
+                hostBadge.textContent = 'HOST';
+                playerDiv.appendChild(hostBadge);
+            }
+            
+            playersContainer.appendChild(playerDiv);
+        });
+        
+        // Update status
+        const statusElement = document.getElementById('lobby-status');
+        if (roomData.players.length === roomData.settings.playerCount) {
+            statusElement.textContent = this.isHost ? 'Ready to start!' : 'Waiting for host to start...';
+            
+            // Auto-start if host and room is full
+            if (this.isHost && !roomData.gameStarted) {
+                setTimeout(() => {
+                    this.startOnlineGame();
+                }, 1000);
+            }
+        } else {
+            const needed = roomData.settings.playerCount - roomData.players.length;
+            statusElement.textContent = `Waiting for ${needed} more player${needed > 1 ? 's' : ''}...`;
+        }
+        
+        this.roomPlayers = roomData.players;
+    }
+
+    copyRoomCode() {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(this.roomCode).then(() => {
+                const btn = document.getElementById('copy-room-code-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Copied!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        } else {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = this.roomCode;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('Room code copied to clipboard!');
+        }
+    }
+
     setupEventListeners() {
         // Welcome screen buttons
         document.getElementById('play-computer-btn').addEventListener('click', () => {
@@ -845,8 +1352,8 @@ class PinsGame {
             this.showStartScreen();
         });
 
-        document.getElementById('play-code-btn').addEventListener('click', () => {
-            alert('With Code - Coming Soon!');
+        document.getElementById('play-online-btn').addEventListener('click', () => {
+            this.showOnlineScreen();
         });
 
         // Back buttons
@@ -858,6 +1365,70 @@ class PinsGame {
         document.getElementById('friends-back-btn').addEventListener('click', (e) => {
             e.target.blur(); // Remove focus to clear hover state
             this.returnToWelcome();
+        });
+
+        // Online screen buttons
+        const onlineBackBtn = document.getElementById('online-back-btn');
+        if (onlineBackBtn) {
+            onlineBackBtn.addEventListener('click', (e) => {
+                console.log('Online back button clicked');
+                e.target.blur();
+                this.returnToWelcome();
+            });
+        } else {
+            console.error('online-back-btn not found');
+        }
+
+        const createRoomBtn = document.getElementById('create-room-btn');
+        if (createRoomBtn) {
+            createRoomBtn.addEventListener('click', () => {
+                this.showCreateRoomScreen();
+            });
+        } else {
+            console.error('create-room-btn not found');
+        }
+
+        const joinRoomBtn = document.getElementById('join-room-btn');
+        if (joinRoomBtn) {
+            joinRoomBtn.addEventListener('click', () => {
+                this.showJoinRoomScreen();
+            });
+        } else {
+            console.error('join-room-btn not found');
+        }
+
+        // Create room screen - buttons are now set up dynamically when screen is shown
+
+        // Join room screen - buttons are now set up dynamically when screen is shown
+
+        // Room lobby screen
+        const lobbyBackBtn = document.getElementById('lobby-back-btn');
+        if (lobbyBackBtn) {
+            lobbyBackBtn.addEventListener('click', (e) => {
+                console.log('Lobby back button clicked');
+                e.target.blur();
+                this.leaveRoom();
+                this.showOnlineScreen();
+            });
+        } else {
+            console.error('lobby-back-btn not found');
+        }
+
+        // Room code button is now set up dynamically when lobby is shown
+
+        // Room code popup
+        document.getElementById('copy-room-code-btn').addEventListener('click', () => {
+            this.copyRoomCode();
+        });
+
+        document.getElementById('close-room-code-popup').addEventListener('click', () => {
+            document.getElementById('room-code-popup').classList.add('hidden');
+        });
+
+        document.getElementById('room-code-popup').addEventListener('click', (e) => {
+            if (e.target.id === 'room-code-popup') {
+                document.getElementById('room-code-popup').classList.add('hidden');
+            }
         });
 
         // Computer screen buttons
@@ -1006,6 +1577,114 @@ class PinsGame {
         
         this.playerCount = counts[newIndex];
         document.getElementById('player-count-display').textContent = this.playerCount;
+    }
+
+    changeRoomPlayerCount(direction) {
+        const counts = [2, 3, 4, 5];
+        const currentIndex = counts.indexOf(this.roomSettings.playerCount);
+        let newIndex = currentIndex + direction;
+        
+        // Wrap around
+        if (newIndex < 0) newIndex = counts.length - 1;
+        if (newIndex >= counts.length) newIndex = 0;
+        
+        this.roomSettings.playerCount = counts[newIndex];
+        document.getElementById('room-player-count-display').textContent = this.roomSettings.playerCount;
+    }
+
+    changeRoomGridSize(direction) {
+        const sizes = [2, 5, 6, 7, 8];
+        const currentIndex = sizes.indexOf(this.roomSettings.gridSize);
+        let newIndex = currentIndex + direction;
+        
+        // Wrap around
+        if (newIndex < 0) newIndex = sizes.length - 1;
+        if (newIndex >= sizes.length) newIndex = 0;
+        
+        this.roomSettings.gridSize = sizes[newIndex];
+        document.getElementById('room-grid-size-display').textContent = `${this.roomSettings.gridSize}×${this.roomSettings.gridSize}`;
+    }
+
+    setupCreateRoomButtons() {
+        // Player count buttons
+        const playerPrev = document.getElementById('room-player-prev');
+        const playerNext = document.getElementById('room-player-next');
+        const gridPrev = document.getElementById('room-grid-prev');
+        const gridNext = document.getElementById('room-grid-next');
+        const createBtn = document.getElementById('create-room-final-btn');
+        
+        if (playerPrev) {
+            playerPrev.replaceWith(playerPrev.cloneNode(true));
+            document.getElementById('room-player-prev').addEventListener('click', (e) => {
+                e.target.blur();
+                this.changeRoomPlayerCount(-1);
+            });
+        }
+        
+        if (playerNext) {
+            playerNext.replaceWith(playerNext.cloneNode(true));
+            document.getElementById('room-player-next').addEventListener('click', (e) => {
+                e.target.blur();
+                this.changeRoomPlayerCount(1);
+            });
+        }
+        
+        if (gridPrev) {
+            gridPrev.replaceWith(gridPrev.cloneNode(true));
+            document.getElementById('room-grid-prev').addEventListener('click', (e) => {
+                e.target.blur();
+                this.changeRoomGridSize(-1);
+            });
+        }
+        
+        if (gridNext) {
+            gridNext.replaceWith(gridNext.cloneNode(true));
+            document.getElementById('room-grid-next').addEventListener('click', (e) => {
+                e.target.blur();
+                this.changeRoomGridSize(1);
+            });
+        }
+        
+        if (createBtn) {
+            createBtn.replaceWith(createBtn.cloneNode(true));
+            document.getElementById('create-room-final-btn').addEventListener('click', () => {
+                this.createRoom();
+            });
+        }
+    }
+
+    setupJoinRoomButtons() {
+        const roomCodeInput = document.getElementById('room-code-input');
+        const joinBtn = document.getElementById('join-room-final-btn');
+        
+        if (roomCodeInput) {
+            roomCodeInput.replaceWith(roomCodeInput.cloneNode(true));
+            const newInput = document.getElementById('room-code-input');
+            newInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.toUpperCase();
+            });
+            newInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const joinBtn = document.getElementById('join-room-final-btn');
+                    if (joinBtn) joinBtn.click();
+                }
+            });
+        }
+        
+        if (joinBtn) {
+            joinBtn.replaceWith(joinBtn.cloneNode(true));
+            document.getElementById('join-room-final-btn').addEventListener('click', () => {
+                const roomCodeInput = document.getElementById('room-code-input');
+                if (roomCodeInput) {
+                    const roomCode = roomCodeInput.value.trim();
+                    if (roomCode.length === 4) {
+                        this.joinRoom(roomCode);
+                    } else {
+                        alert('Please enter a 4-letter room code');
+                    }
+                }
+            });
+        }
     }
 
     startGame() {
@@ -1769,13 +2448,38 @@ class PinsGame {
     }
 
     returnToWelcome() {
+        // Clean up online state if needed
+        if (this.lobbyInterval) {
+            clearInterval(this.lobbyInterval);
+            this.lobbyInterval = null;
+        }
+        
         // Hide all screens except welcome
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('computer-screen').classList.add('hidden');
+        document.getElementById('online-screen').classList.add('hidden');
+        document.getElementById('create-room-screen').classList.add('hidden');
+        document.getElementById('join-room-screen').classList.add('hidden');
+        document.getElementById('room-lobby-screen').classList.add('hidden');
         document.getElementById('welcome-screen').classList.remove('hidden');
     }
 
     returnToHome() {
+        // Clean up online state
+        if (this.isOnlineMode) {
+            this.leaveRoom();
+        }
+        
+        // Clear intervals
+        if (this.lobbyInterval) {
+            clearInterval(this.lobbyInterval);
+            this.lobbyInterval = null;
+        }
+        if (this.gameInterval) {
+            clearInterval(this.gameInterval);
+            this.gameInterval = null;
+        }
+        
         // Reset game state
         this.currentPlayer = 1;
         this.scores = {};
@@ -1797,9 +2501,14 @@ class PinsGame {
         // Hide all modals and game container
         document.getElementById('menu-modal').classList.add('hidden');
         document.getElementById('game-over-modal').classList.add('hidden');
+        document.getElementById('room-code-popup').classList.add('hidden');
         document.querySelector('.game-container').classList.add('hidden');
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('computer-screen').classList.add('hidden');
+        document.getElementById('online-screen').classList.add('hidden');
+        document.getElementById('create-room-screen').classList.add('hidden');
+        document.getElementById('join-room-screen').classList.add('hidden');
+        document.getElementById('room-lobby-screen').classList.add('hidden');
         
         // Show welcome screen
         document.getElementById('welcome-screen').classList.remove('hidden');
