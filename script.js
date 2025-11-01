@@ -14,6 +14,7 @@ class PinsGame {
         this.colorTheme = 'blue-red'; // Default color theme
         this.gameMode = '2player'; // '2player' or 'bot'
         this.botThinking = false; // Track if bot is thinking
+        this.difficulty = 'easy'; // 'easy', 'medium', 'hard'
         this.audioContext = null; // Audio context for sound effects
         this.soundEnabled = true; // Sound effects toggle
         
@@ -794,6 +795,40 @@ class PinsGame {
     }
 
     setupEventListeners() {
+        // Welcome screen buttons
+        document.getElementById('play-computer-btn').addEventListener('click', () => {
+            this.showComputerScreen();
+        });
+
+        document.getElementById('play-friends-btn').addEventListener('click', () => {
+            this.showStartScreen();
+        });
+
+        document.getElementById('play-code-btn').addEventListener('click', () => {
+            alert('With Code - Coming Soon!');
+        });
+
+        // Computer screen buttons
+        document.getElementById('difficulty-prev').addEventListener('click', () => {
+            this.changeDifficulty(-1);
+        });
+
+        document.getElementById('difficulty-next').addEventListener('click', () => {
+            this.changeDifficulty(1);
+        });
+
+        document.getElementById('computer-grid-prev').addEventListener('click', () => {
+            this.changeComputerGridSize(-1);
+        });
+
+        document.getElementById('computer-grid-next').addEventListener('click', () => {
+            this.changeComputerGridSize(1);
+        });
+
+        document.getElementById('start-computer-game-btn').addEventListener('click', () => {
+            this.startComputerGame();
+        });
+
         // Start screen buttons
         document.getElementById('start-game-btn').addEventListener('click', () => {
             this.startGame();
@@ -938,6 +973,67 @@ class PinsGame {
         this.startBackgroundMusic();
     }
 
+    showStartScreen() {
+        document.getElementById('welcome-screen').classList.add('hidden');
+        document.getElementById('start-screen').classList.remove('hidden');
+    }
+
+    showComputerScreen() {
+        document.getElementById('welcome-screen').classList.add('hidden');
+        document.getElementById('computer-screen').classList.remove('hidden');
+    }
+
+    changeDifficulty(direction) {
+        const difficulties = ['Easy', 'Medium', 'Hard', 'Expert'];
+        const currentIndex = difficulties.findIndex(d => d.toLowerCase() === this.difficulty);
+        let newIndex = currentIndex + direction;
+        
+        // Wrap around
+        if (newIndex < 0) newIndex = difficulties.length - 1;
+        if (newIndex >= difficulties.length) newIndex = 0;
+        
+        this.difficulty = difficulties[newIndex].toLowerCase();
+        document.getElementById('difficulty-display').textContent = difficulties[newIndex];
+    }
+
+    changeComputerGridSize(direction) {
+        const sizes = [2, 5, 6, 7, 8];
+        const currentIndex = sizes.indexOf(this.gridSize);
+        let newIndex = currentIndex + direction;
+        
+        // Wrap around
+        if (newIndex < 0) newIndex = sizes.length - 1;
+        if (newIndex >= sizes.length) newIndex = 0;
+        
+        this.gridSize = sizes[newIndex];
+        document.getElementById('computer-grid-size-display').textContent = `${this.gridSize}×${this.gridSize}`;
+    }
+
+    startComputerGame() {
+        // Set to 2 players and bot mode
+        this.playerCount = 2;
+        this.gameMode = 'bot';
+        
+        // Initialize scores for 2 players
+        this.scores = {
+            player1: 0,
+            player2: 0
+        };
+        
+        // Hide/show color theme section (show for 2 players)
+        const colorThemeSection = document.getElementById('color-theme-section');
+        if (colorThemeSection) {
+            colorThemeSection.style.display = 'block';
+        }
+        
+        document.getElementById('computer-screen').classList.add('hidden');
+        document.querySelector('.game-container').classList.remove('hidden');
+        this.initializeGame();
+        
+        // Start background music
+        this.startBackgroundMusic();
+    }
+
     returnToHome() {
         // Reset game state
         this.currentPlayer = 1;
@@ -948,6 +1044,8 @@ class PinsGame {
         this.boxes = [];
         this.gameOver = false;
         this.gameStarted = false;
+        this.gameMode = '2player';
+        this.difficulty = 'easy';
 
         // Clear any existing turn text timeout
         if (this.turnTextTimeout) {
@@ -959,9 +1057,11 @@ class PinsGame {
         document.getElementById('menu-modal').classList.add('hidden');
         document.getElementById('game-over-modal').classList.add('hidden');
         document.querySelector('.game-container').classList.add('hidden');
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('computer-screen').classList.add('hidden');
         
-        // Show start screen
-        document.getElementById('start-screen').classList.remove('hidden');
+        // Show welcome screen
+        document.getElementById('welcome-screen').classList.remove('hidden');
         
         // Reset body class
         document.body.className = '';

@@ -10,58 +10,158 @@
 </head>
 
 <body>
-    <!-- Start Screen -->
-    <div id="start-screen" class="start-screen">
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="start-screen">
         <div class="start-content">
             <div class="logo-container">
                 <img src="favicon.ico" alt="Dots & Boxes" class="logo-icon">
             </div>
             <h1 class="game-title">Dots & Boxes</h1>
             <p class="game-subtitle">A classic strategy game of connecting dots</p>
-            
+
             <div class="divider"></div>
-            
+
+            <div class="welcome-options">
+                <button id="play-computer-btn" class="welcome-option-btn">
+                    <span>Single Player</span>
+                </button>
+
+                <button id="play-friends-btn" class="welcome-option-btn">
+                    <span>Multiplayer</span>
+                </button>
+
+                <button id="play-code-btn" class="welcome-option-btn">
+                    <span>Custom Game</span>
+                </button>
+            </div>
+
+            <div class="start-footer">
+                <p>© 2025 Taizun. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Computer Play Screen -->
+    <div id="computer-screen" class="start-screen hidden">
+        <div class="start-content">
+            <div class="logo-container">
+                <img src="favicon.ico" alt="Dots & Boxes" class="logo-icon">
+            </div>
+            <h1 class="game-title">Dots & Boxes</h1>
+            <p class="game-subtitle">A classic strategy game of connecting dots</p>
+
+            <div class="divider"></div>
+
+            <div class="start-options">
+                <label class="grid-label">Difficulty</label>
+                <div class="player-count-selector">
+                    <button class="grid-arrow" id="difficulty-prev" aria-label="Previous difficulty">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div class="grid-size-display" id="difficulty-display" style="font-size: 32px; min-width: 120px;">
+                        Easy</div>
+                    <button class="grid-arrow" id="difficulty-next" aria-label="Next difficulty">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="start-options">
+                <label class="grid-label">Grid Size</label>
+                <div class="grid-size-selector">
+                    <button class="grid-arrow" id="computer-grid-prev" aria-label="Previous size">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div class="grid-size-display" id="computer-grid-size-display">6×6</div>
+                    <button class="grid-arrow" id="computer-grid-next" aria-label="Next size">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button id="start-computer-game-btn" class="start-btn">
+                <span>Start Game</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+
+            <div class="start-footer">
+                <p>© 2025 Taizun. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="start-screen hidden">
+        <div class="start-content">
+            <div class="logo-container">
+                <img src="favicon.ico" alt="Dots & Boxes" class="logo-icon">
+            </div>
+            <h1 class="game-title">Dots & Boxes</h1>
+            <p class="game-subtitle">A classic strategy game of connecting dots</p>
+
+            <div class="divider"></div>
+
             <div class="start-options">
                 <label class="grid-label">Number of Players</label>
                 <div class="player-count-selector">
                     <button class="grid-arrow" id="player-prev" aria-label="Previous player count">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="15 18 9 12 15 6"></polyline>
                         </svg>
                     </button>
                     <div class="grid-size-display" id="player-count-display">2</div>
                     <button class="grid-arrow" id="player-next" aria-label="Next player count">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
                     </button>
                 </div>
             </div>
-            
+
             <div class="start-options">
                 <label class="grid-label">Grid Size</label>
                 <div class="grid-size-selector">
                     <button class="grid-arrow" id="grid-prev" aria-label="Previous size">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="15 18 9 12 15 6"></polyline>
                         </svg>
                     </button>
                     <div class="grid-size-display" id="grid-size-display">6×6</div>
                     <button class="grid-arrow" id="grid-next" aria-label="Next size">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
                     </button>
                 </div>
             </div>
-            
+
             <button id="start-game-btn" class="start-btn">
                 <span>Start Game</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
             </button>
-            
+
             <div class="start-footer">
                 <p>© 2025 Taizun. All rights reserved.</p>
             </div>
@@ -146,7 +246,8 @@
                     </div>
 
                     <button class="sound-toggle-btn active" id="sound-toggle-btn" aria-label="Toggle sound effects">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                             <path class="sound-waves" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                             <path class="sound-waves" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>

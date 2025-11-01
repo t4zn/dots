@@ -1378,6 +1378,53 @@ body.player5-turn .turn-display {
     }
 }
 
+/* Welcome Screen Options */
+.welcome-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 40px;
+}
+
+.welcome-option-btn {
+    background: transparent;
+    color: #000000;
+    border: 1px solid #d1d5db;
+    padding: 16px 32px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+.welcome-option-btn:hover {
+    border-color: #000000;
+    background: #000000;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.welcome-option-btn:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+    .welcome-options {
+        gap: 10px;
+    }
+
+    .welcome-option-btn {
+        padding: 14px 24px;
+        font-size: 14px;
+    }
+}
+
 /* 
 Start Screen */
 .start-screen {
@@ -1399,11 +1446,14 @@ Start Screen */
 
 .start-content {
     background: #ffffff;
-    padding: 60px 50px;
+    padding: 50px 45px;
     text-align: center;
-    max-width: 480px;
+    max-width: 420px;
     width: 90%;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 80vh;
 }
 
 .logo-container {
@@ -1414,34 +1464,34 @@ Start Screen */
 }
 
 .logo-icon {
-    width: 80px;
-    height: 80px;
+    width: 64px;
+    height: 64px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.06));
 }
 
 .game-title {
-    font-size: 56px;
-    font-weight: 900;
+    font-size: 48px;
+    font-weight: 800;
     color: #000000;
-    margin-bottom: 12px;
-    letter-spacing: -2px;
-    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
 }
 
 .game-subtitle {
-    font-size: 15px;
-    color: #6b7280;
+    font-size: 14px;
+    color: #9ca3af;
     margin-bottom: 0;
     font-weight: 400;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
 }
 
 .divider {
-    width: 60px;
-    height: 2px;
-    background: #000000;
-    margin: 40px auto;
+    width: 40px;
+    height: 1.5px;
+    background: #d1d5db;
+    margin: 36px auto;
 }
 
 .start-options {
@@ -1510,9 +1560,9 @@ Start Screen */
     background: #000000;
     color: #ffffff;
     border: none;
-    padding: 18px 40px;
+    padding: 14px 32px;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1520,8 +1570,10 @@ Start Screen */
     letter-spacing: 1.5px;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    margin: 0 auto;
 }
 
 .start-btn:hover {
@@ -1543,21 +1595,22 @@ Start Screen */
 }
 
 .start-footer {
-    margin-top: 50px;
+    margin-top: auto;
     padding-top: 30px;
     border-top: 1px solid #e5e7eb;
 }
 
 .start-footer p {
-    font-size: 11px;
-    color: #9ca3af;
+    font-size: 10px;
+    color: #d1d5db;
     font-weight: 400;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 @media (max-width: 480px) {
     .start-content {
         padding: 40px 30px;
+        min-height: 85vh;
     }
 
     .logo-icon {
@@ -1602,8 +1655,8 @@ Start Screen */
     }
 
     .start-btn {
-        padding: 16px 32px;
-        font-size: 14px;
+        padding: 12px 28px;
+        font-size: 13px;
     }
 
     .start-footer {
