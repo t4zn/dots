@@ -622,7 +622,12 @@ class PinsGame {
 
     checkGameEnd() {
         const totalPossibleBoxes = (this.gridSize - 1) * (this.gridSize - 1);
-        const claimedBoxes = this.scores.player1 + this.scores.player2;
+        
+        // Count all players' scores
+        let claimedBoxes = 0;
+        for (let i = 1; i <= this.playerCount; i++) {
+            claimedBoxes += this.scores[`player${i}`] || 0;
+        }
 
         if (claimedBoxes === totalPossibleBoxes) {
             this.gameOver = true;
