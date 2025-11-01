@@ -4923,25 +4923,30 @@ class PinsGame {
         const isAndroid = /android/i.test(userAgent);
         
         if (isAndroid) {
-            // Try to open the app if installed, otherwise redirect to Play Store
-            const appUrl = 'intent://dots.taizun.site#Intent;scheme=https;package=com.taizun.dotsboxes;end';
-            const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.taizun.dotsboxes';
-            
-            // Create a hidden iframe to try opening the app
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = appUrl;
-            document.body.appendChild(iframe);
-            
-            // Fallback to Play Store after a short delay
-            setTimeout(() => {
-                document.body.removeChild(iframe);
-                window.open(playStoreUrl, '_blank');
-            }, 1000);
+            // Direct APK download
+            this.downloadAPK();
         } else {
-            // For non-Android devices, show a message or redirect to a general download page
-            alert('Download the Dots & Boxes app from your device\'s app store for the best offline experience!');
+            // For non-Android devices, show a message
+            alert('This app is currently available for Android devices only. Please visit on an Android device to download.');
         }
+    }
+
+    downloadAPK() {
+        // Create a temporary link element to trigger download
+        const link = document.createElement('a');
+        link.href = './downloads/dots.apk'; // Path to your APK file
+        link.download = 'dots.apk'; // The filename for the downloaded file
+        link.style.display = 'none';
+        
+        // Add to DOM, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Show a helpful message
+        setTimeout(() => {
+            alert('APK download started! Please check your downloads folder and enable "Install from unknown sources" in your Android settings if needed.');
+        }, 500);
     }
 }
 
