@@ -805,9 +805,16 @@ class PinsGame {
         
         // Set win text based on result
         if (winners.length === 1) {
-            winText.innerHTML = `${winColorName}<br>WIN`;
+            if (this.gameMode === 'bot') {
+                winText.innerHTML = winningPlayer === 1 ? 'YOU<br>WIN' : 'BOT<br>WINS';
+            } else if (this.gameMode === 'online') {
+                const myPlayerNumber = this.roomPlayers.find(p => p.id === this.playerId)?.playerNumber;
+                winText.innerHTML = winningPlayer === myPlayerNumber ? 'YOU<br>WIN' : `PLAYER ${winningPlayer}<br>WINS`;
+            } else {
+                winText.innerHTML = `PLAYER ${winningPlayer}<br>WINS`;
+            }
         } else {
-            winText.innerHTML = winColorName; // Just "DRAW"
+            winText.innerHTML = 'DRAW'; // Just "DRAW"
         }
         
         winScreen.classList.remove('hidden');
