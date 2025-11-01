@@ -25,6 +25,7 @@ class PinsGame {
         this.playerId = null;
         this.isHost = false;
         this.roomPlayers = [];
+        this.previousPlayerCount = 0;
         this.roomSettings = {
             playerCount: 2,
             gridSize: 6
@@ -45,9 +46,17 @@ class PinsGame {
             5: ['#ef4444', '#3b82f6', '#10b981', '#eab308', '#a855f7'] // Red, Blue, Green, Yellow, Purple
         };
 
+        // Load cached settings (without UI updates)
+        this.loadCachedSettings(false);
+        
         this.setupEventListeners();
         this.initAudio();
         this.cleanupOldRooms();
+        
+        // Update UI after DOM is ready
+        setTimeout(() => {
+            this.updateUIWithCachedSettings();
+        }, 0);
     }
 
     initAudio() {
@@ -768,7 +777,14 @@ class PinsGame {
         
         // Show fullscreen win message
         winScreen.style.background = winColor;
-        winText.innerHTML = `${winColorName}<br>WINS`;
+        
+        // Set win text based on result
+        if (winners.length === 1) {
+            winText.innerHTML = `${winColorName}<br>WIN`;
+        } else {
+            winText.innerHTML = winColorName; // Just "DRAW"
+        }
+        
         winScreen.classList.remove('hidden');
     }
 
@@ -832,6 +848,8 @@ class PinsGame {
                 btn.classList.add('active');
             }
         });
+        
+        this.saveCachedSettings();
     }
 
     toggleSound() {
@@ -843,6 +861,8 @@ class PinsGame {
         } else {
             btn.classList.remove('active');
         }
+        
+        this.saveCachedSettings();
     }
 
     getPlayerColor(playerNum) {
@@ -902,11 +922,145 @@ class PinsGame {
         }
     }
 
+    // Caching Methods
+    loadCachedSettings(updateUI = true) {
+        try {
+            const cachedSettings = localStorage.getItem('dotsBoxesSettings');
+            if (cachedSettings) {
+                const settings = JSON.parse(cachedSettings);
+                
+                // Load game settings
+                this.gridSize = settings.gridSize || 6;
+                this.playerCount = settings.playerCount || 2;
+                this.difficulty = settings.difficulty || 'easy';
+                this.colorTheme = settings.colorTheme || 'blue-red';
+                this.soundEnabled = settings.soundEnabled !== undefined ? settings.soundEnabled : true;
+                
+                // Load room settings
+                this.roomSettings = {
+                    playerCount: settings.roomPlayerCount || 2,
+                    gridSize: settings.roomGridSize || 6
+                };
+                
+                // Update UI elements with cached values only if requested
+                if (updateUI) {
+                    this.updateUIWithCachedSettings();
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to load cached settings:', e);
+        }
+    }
+
+    saveCachedSettings() {
+        try {
+            const settings = {
+                gridSize: this.gridSize,
+                playerCount: this.playerCount,
+                difficulty: this.difficulty,
+                colorTheme: this.colorTheme,
+                soundEnabled: this.soundEnabled,
+                roomPlayerCount: this.roomSettings.playerCount,
+                roomGridSize: this.roomSettings.gridSize,
+                lastUpdated: Date.now()
+            };
+            
+            localStorage.setItem('dotsBoxesSettings', JSON.stringify(settings));
+        } catch (e) {
+            console.warn('Failed to save settings:', e);
+        }
+    }
+
+    updateUIWithCachedSettings() {
+        // Update main game settings displays
+        const gridDisplay = document.getElementById('grid-size-display');
+        if (gridDisplay) {
+            gridDisplay.textContent = `${this.gridSize}×${this.gridSize}`;
+        }
+        
+        const playerDisplay = document.getElementById('player-count-display');
+        if (playerDisplay) {
+            playerDisplay.textContent = this.playerCount;
+        }
+        
+        const computerGridDisplay = document.getElementById('computer-grid-size-display');
+        if (computerGridDisplay) {
+            computerGridDisplay.textContent = `${this.gridSize}×${this.gridSize}`;
+        }
+        
+        const difficultyDisplay = document.getElementById('difficulty-display');
+        if (difficultyDisplay) {
+            const difficulties = ['Easy', 'Medium', 'Hard', 'Expert'];
+            const difficultyIndex = ['easy', 'medium', 'hard', 'expert'].indexOf(this.difficulty);
+            difficultyDisplay.textContent = difficulties[difficultyIndex] || 'Easy';
+        }
+        
+        // Update room settings displays
+        const roomPlayerDisplay = document.getElementById('room-player-count-display');
+        if (roomPlayerDisplay) {
+            roomPlayerDisplay.textContent = this.roomSettings.playerCount;
+        }
+        
+        const roomGridDisplay = document.getElementById('room-grid-size-display');
+        if (roomGridDisplay) {
+            roomGridDisplay.textContent = `${this.roomSettings.gridSize}×${this.roomSettings.gridSize}`;
+        }
+        
+        // Update color theme
+        document.body.setAttribute('data-theme', this.colorTheme);
+        document.querySelectorAll('.color-theme-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.theme === this.colorTheme) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Update sound toggle
+        const soundBtn = document.getElementById('sound-toggle-btn');
+        if (soundBtn) {
+            if (this.soundEnabled) {
+                soundBtn.classList.add('active');
+            } else {
+                soundBtn.classList.remove('active');
+            }
+        }
+    }
+
+    cacheRecentRoomCode(roomCode) {
+        try {
+            let recentRooms = JSON.parse(localStorage.getItem('dotsBoxesRecentRooms') || '[]');
+            
+            // Remove if already exists
+            recentRooms = recentRooms.filter(code => code !== roomCode);
+            
+            // Add to beginning
+            recentRooms.unshift(roomCode);
+            
+            // Keep only last 5 room codes
+            recentRooms = recentRooms.slice(0, 5);
+            
+            localStorage.setItem('dotsBoxesRecentRooms', JSON.stringify(recentRooms));
+        } catch (e) {
+            console.warn('Failed to cache room code:', e);
+        }
+    }
+
+    getRecentRoomCodes() {
+        try {
+            return JSON.parse(localStorage.getItem('dotsBoxesRecentRooms') || '[]');
+        } catch (e) {
+            return [];
+        }
+    }
+
     createRoom() {
         this.roomCode = this.generateRoomCode();
         this.playerId = this.generatePlayerId();
         this.isHost = true;
         this.isOnlineMode = true;
+        
+        // Cache the room code for quick access
+        this.cacheRecentRoomCode(this.roomCode);
         
         // Initialize room with host player
         this.roomPlayers = [{
@@ -975,6 +1129,10 @@ class PinsGame {
         localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
         
         this.showRoomLobby();
+        
+        // Cache the room code for quick access
+        this.cacheRecentRoomCode(roomCode);
+        
         return true;
     }
 
@@ -1210,6 +1368,14 @@ class PinsGame {
         
         // Set up join room buttons
         this.setupJoinRoomButtons();
+        
+        // Pre-fill with most recent room code if available
+        const recentRooms = this.getRecentRoomCodes();
+        const roomCodeInput = document.getElementById('room-code-input');
+        if (roomCodeInput && recentRooms.length > 0) {
+            roomCodeInput.value = recentRooms[0];
+            roomCodeInput.select(); // Select the text for easy replacement
+        }
     }
 
     showRoomLobby() {
@@ -1314,21 +1480,57 @@ class PinsGame {
             statusElement.textContent = `Waiting for ${needed} more player${needed > 1 ? 's' : ''}...`;
         }
         
+        // Check for player changes and show notifications
+        if (this.previousPlayerCount > 0 && roomData.players.length < this.previousPlayerCount) {
+            this.showNotification('A player left the room');
+        }
+        
+        this.previousPlayerCount = roomData.players.length;
         this.roomPlayers = roomData.players;
+    }
+
+    showNotification(message) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        
+        // Add to body
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        // Hide and remove notification
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
     }
 
     copyRoomCode() {
         if (navigator.clipboard) {
             navigator.clipboard.writeText(this.roomCode).then(() => {
                 const btn = document.getElementById('copy-room-code-btn');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Copied!';
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
                 btn.classList.add('copied');
                 
                 setTimeout(() => {
-                    btn.innerHTML = originalText;
+                    btn.textContent = originalText;
                     btn.classList.remove('copied');
-                }, 2000);
+                }, 1500);
+                
+                // Close popup after copying
+                setTimeout(() => {
+                    document.getElementById('room-code-popup').classList.add('hidden');
+                }, 1000);
             });
         } else {
             // Fallback for older browsers
@@ -1338,23 +1540,41 @@ class PinsGame {
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            alert('Room code copied to clipboard!');
+            
+            const btn = document.getElementById('copy-room-code-btn');
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            
+            setTimeout(() => {
+                btn.textContent = 'Copy';
+                btn.classList.remove('copied');
+                document.getElementById('room-code-popup').classList.add('hidden');
+            }, 1500);
         }
     }
 
     setupEventListeners() {
         // Welcome screen buttons
-        document.getElementById('play-computer-btn').addEventListener('click', () => {
-            this.showComputerScreen();
-        });
+        const playComputerBtn = document.getElementById('play-computer-btn');
+        if (playComputerBtn) {
+            playComputerBtn.addEventListener('click', () => {
+                this.showComputerScreen();
+            });
+        }
 
-        document.getElementById('play-friends-btn').addEventListener('click', () => {
-            this.showStartScreen();
-        });
+        const playFriendsBtn = document.getElementById('play-friends-btn');
+        if (playFriendsBtn) {
+            playFriendsBtn.addEventListener('click', () => {
+                this.showStartScreen();
+            });
+        }
 
-        document.getElementById('play-online-btn').addEventListener('click', () => {
-            this.showOnlineScreen();
-        });
+        const playOnlineBtn = document.getElementById('play-online-btn');
+        if (playOnlineBtn) {
+            playOnlineBtn.addEventListener('click', () => {
+                this.showOnlineScreen();
+            });
+        }
 
         // Back buttons
         document.getElementById('computer-back-btn').addEventListener('click', (e) => {
@@ -1417,19 +1637,29 @@ class PinsGame {
         // Room code button is now set up dynamically when lobby is shown
 
         // Room code popup
-        document.getElementById('copy-room-code-btn').addEventListener('click', () => {
-            this.copyRoomCode();
-        });
+        const copyRoomCodeBtn = document.getElementById('copy-room-code-btn');
+        if (copyRoomCodeBtn) {
+            copyRoomCodeBtn.addEventListener('click', () => {
+                this.copyRoomCode();
+            });
+        }
 
-        document.getElementById('close-room-code-popup').addEventListener('click', () => {
-            document.getElementById('room-code-popup').classList.add('hidden');
-        });
-
-        document.getElementById('room-code-popup').addEventListener('click', (e) => {
-            if (e.target.id === 'room-code-popup') {
+        const closeRoomCodePopup = document.getElementById('close-room-code-popup');
+        if (closeRoomCodePopup) {
+            closeRoomCodePopup.addEventListener('click', () => {
                 document.getElementById('room-code-popup').classList.add('hidden');
-            }
-        });
+            });
+        }
+
+        // Room code popup - close when clicking outside
+        const roomCodePopup = document.getElementById('room-code-popup');
+        if (roomCodePopup) {
+            roomCodePopup.addEventListener('click', (e) => {
+                if (e.target.id === 'room-code-popup') {
+                    document.getElementById('room-code-popup').classList.add('hidden');
+                }
+            });
+        }
 
         // Computer screen buttons
         document.getElementById('difficulty-prev').addEventListener('click', (e) => {
@@ -1452,14 +1682,20 @@ class PinsGame {
             this.changeComputerGridSize(1);
         });
 
-        document.getElementById('start-computer-game-btn').addEventListener('click', () => {
-            this.startComputerGame();
-        });
+        const startComputerGameBtn = document.getElementById('start-computer-game-btn');
+        if (startComputerGameBtn) {
+            startComputerGameBtn.addEventListener('click', () => {
+                this.startComputerGame();
+            });
+        }
 
         // Start screen buttons
-        document.getElementById('start-game-btn').addEventListener('click', () => {
-            this.startGame();
-        });
+        const startGameBtn = document.getElementById('start-game-btn');
+        if (startGameBtn) {
+            startGameBtn.addEventListener('click', () => {
+                this.startGame();
+            });
+        }
 
         // Grid size navigation arrows
         document.getElementById('grid-prev').addEventListener('click', (e) => {
@@ -1484,9 +1720,12 @@ class PinsGame {
         });
 
         // Menu buttons
-        document.getElementById('menu-btn').addEventListener('click', () => {
-            this.showMenu();
-        });
+        const menuBtn = document.getElementById('menu-btn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+                this.showMenu();
+            });
+        }
 
         // Score button (no click functionality needed)
 
@@ -1495,9 +1734,12 @@ class PinsGame {
             this.hideMenu();
         });
 
-        document.getElementById('restart-game-btn').addEventListener('click', () => {
-            this.restartGame();
-        });
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        if (restartGameBtn) {
+            restartGameBtn.addEventListener('click', () => {
+                this.restartGame();
+            });
+        }
 
         document.getElementById('return-home-btn').addEventListener('click', () => {
             this.returnToHome();
@@ -1564,6 +1806,7 @@ class PinsGame {
         
         this.gridSize = sizes[newIndex];
         document.getElementById('grid-size-display').textContent = `${this.gridSize}×${this.gridSize}`;
+        this.saveCachedSettings();
     }
 
     changePlayerCount(direction) {
@@ -1577,6 +1820,7 @@ class PinsGame {
         
         this.playerCount = counts[newIndex];
         document.getElementById('player-count-display').textContent = this.playerCount;
+        this.saveCachedSettings();
     }
 
     changeRoomPlayerCount(direction) {
@@ -1590,6 +1834,7 @@ class PinsGame {
         
         this.roomSettings.playerCount = counts[newIndex];
         document.getElementById('room-player-count-display').textContent = this.roomSettings.playerCount;
+        this.saveCachedSettings();
     }
 
     changeRoomGridSize(direction) {
@@ -1603,6 +1848,7 @@ class PinsGame {
         
         this.roomSettings.gridSize = sizes[newIndex];
         document.getElementById('room-grid-size-display').textContent = `${this.roomSettings.gridSize}×${this.roomSettings.gridSize}`;
+        this.saveCachedSettings();
     }
 
     setupCreateRoomButtons() {
@@ -1733,6 +1979,7 @@ class PinsGame {
         
         this.difficulty = difficulties[newIndex].toLowerCase();
         document.getElementById('difficulty-display').textContent = difficulties[newIndex];
+        this.saveCachedSettings();
     }
 
     changeComputerGridSize(direction) {
@@ -1746,6 +1993,7 @@ class PinsGame {
         
         this.gridSize = sizes[newIndex];
         document.getElementById('computer-grid-size-display').textContent = `${this.gridSize}×${this.gridSize}`;
+        this.saveCachedSettings();
     }
 
     startComputerGame() {
