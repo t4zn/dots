@@ -4942,11 +4942,6 @@ class PinsGame {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
-        // Show a helpful message
-        setTimeout(() => {
-            alert('APK download started! Please check your downloads folder and enable "Install from unknown sources" in your Android settings if needed.');
-        }, 500);
     }
 }
 
