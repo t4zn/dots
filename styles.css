@@ -1652,42 +1652,7 @@ body.player5-turn .turn-display {
     stroke: none !important;
 }
 
-/* Download App Button */
-.download-app-btn {
-    background: #000000;
-    color: #ffffff;
-    border: 1px solid #000000;
-    padding: 16px 32px;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    text-align: center;
-    letter-spacing: 0.3px;
-    margin-top: 20px;
-}
 
-.download-app-btn:hover {
-    background: #1a1a1a;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.download-app-btn:active {
-    transform: translateY(0);
-}
-
-/* Show download button on mobile, hide on desktop */
-@media (min-width: 769px) {
-    .download-app-btn {
-        display: none !important; /* Hide on desktop */
-    }
-}
 
 /* Premium Popup Styles */
 .premium-popup-content {
