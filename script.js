@@ -1486,49 +1486,7 @@ class PinsGame {
         return mobileRegex.test(userAgent) || (isMobileWidth && isTouchDevice);
     }
 
-    downloadApp() {
-        // Create a simple download page or redirect
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-        
-        if (/android/i.test(userAgent)) {
-            // Android device - could redirect to Play Store when available
-            alert('Android app coming soon! For now, please bookmark this page and add it to your home screen for the best mobile experience.');
-            
-            // Show instructions for adding to home screen
-            this.showAddToHomeScreenInstructions();
-        } else if (/iPad|iPhone|iPod/.test(userAgent)) {
-            // iOS device - could redirect to App Store when available
-            alert('iOS app coming soon! For now, please bookmark this page and add it to your home screen for the best mobile experience.');
-            
-            // Show instructions for adding to home screen
-            this.showAddToHomeScreenInstructions();
-        } else {
-            // Desktop - show QR code or link
-            alert('Scan this QR code with your mobile device or visit this page on your phone to play online multiplayer!');
-        }
-    }
 
-    showAddToHomeScreenInstructions() {
-        const instructions = `
-To add Dots & Boxes to your home screen:
-
-📱 Android:
-1. Tap the menu (⋮) in your browser
-2. Select "Add to Home screen"
-3. Tap "Add"
-
-🍎 iPhone/iPad:
-1. Tap the Share button (□↗)
-2. Select "Add to Home Screen"
-3. Tap "Add"
-
-This will give you a native app-like experience!
-        `;
-        
-        setTimeout(() => {
-            alert(instructions);
-        }, 1000);
-    }
 
     cacheRecentRoomCode(roomCode) {
         try {
