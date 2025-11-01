@@ -32,6 +32,7 @@ class PinsGame {
         };
         this.gameState = null;
         this.onlineGameStarted = false;
+        this.startGameTimeout = null;
         
         // Settings properties
         this.playerName = 'Player';
@@ -899,6 +900,15 @@ class PinsGame {
     }
 
     showMenu() {
+        // Show room code in menu if in online mode
+        const menuRoomCodeSection = document.getElementById('menu-room-code-section');
+        if (this.isOnlineMode && this.roomCode && menuRoomCodeSection) {
+            menuRoomCodeSection.style.display = 'block';
+            document.getElementById('menu-room-code-text').textContent = this.roomCode;
+        } else if (menuRoomCodeSection) {
+            menuRoomCodeSection.style.display = 'none';
+        }
+        
         document.getElementById('menu-modal').classList.remove('hidden');
     }
 
@@ -918,6 +928,51 @@ class PinsGame {
 
     generatePlayerId() {
         return 'player_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    generateTempId() {
+        // Generate a temporary ID based on browser fingerprint for reconnection
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText('Browser fingerprint', 2, 2);
+        return canvas.toDataURL().slice(-10);
+    }
+
+    joinOngoingGame(roomData) {
+        // Set up game state for joining ongoing game
+        this.playerCount = roomData.settings.playerCount;
+        this.gridSize = roomData.settings.gridSize;
+        this.gameMode = 'online';
+        this.onlineGameStarted = true;
+        
+        // Load existing game state
+        if (roomData.gameState) {
+            this.loadGameState(roomData.gameState);
+        } else {
+            // Initialize scores for all players
+            this.scores = {};
+            for (let i = 1; i <= this.playerCount; i++) {
+                this.scores[`player${i}`] = 0;
+            }
+        }
+        
+        // Show game screen
+        document.getElementById('join-room-screen').classList.add('hidden');
+        document.getElementById('room-lobby-screen').classList.add('hidden');
+        document.querySelector('.game-container').classList.remove('hidden');
+        this.initializeGame();
+        
+        // Start polling for game updates
+        if (this.lobbyInterval) {
+            clearInterval(this.lobbyInterval);
+        }
+        this.gameInterval = setInterval(() => {
+            this.pollForUpdates();
+        }, 500);
+        
+        this.showNotification('Joined ongoing game!');
     }
 
     cleanupOldRooms() {
@@ -1440,9 +1495,10 @@ class PinsGame {
         // Initialize room with host player
         this.roomPlayers = [{
             id: this.playerId,
-            name: 'You',
+            name: this.playerName || 'Host',
             isHost: true,
-            playerNumber: 1
+            playerNumber: 1,
+            tempId: this.generateTempId()
         }];
         
         // Store room data in localStorage (simulating server)
@@ -1473,16 +1529,39 @@ class PinsGame {
             return false;
         }
         
+        // Check if player is already in the room (reconnection case)
+        const tempId = this.generateTempId();
+        const existingPlayer = roomData.players.find(p => 
+            (p.name === this.playerName && this.playerName !== 'Player') || 
+            p.tempId === tempId
+        );
+        
+        if (existingPlayer) {
+            // Reconnect to existing slot
+            this.roomCode = roomCode;
+            this.playerId = existingPlayer.id;
+            this.isHost = existingPlayer.isHost;
+            this.isOnlineMode = true;
+            this.roomSettings = roomData.settings;
+            this.roomPlayers = roomData.players;
+            
+            // If game already started, join the ongoing game
+            if (roomData.gameStarted) {
+                this.joinOngoingGame(roomData);
+            } else {
+                this.showRoomLobby();
+            }
+            
+            this.cacheRecentRoomCode(roomCode);
+            return true;
+        }
+        
         if (roomData.players.length >= roomData.settings.playerCount) {
             alert('Room is full!');
             return false;
         }
         
-        if (roomData.gameStarted) {
-            alert('Game has already started!');
-            return false;
-        }
-        
+        // Allow joining even if game started but there's space (for reconnections)
         this.roomCode = roomCode;
         this.playerId = this.generatePlayerId();
         this.isHost = false;
@@ -1492,9 +1571,10 @@ class PinsGame {
         // Add player to room
         const newPlayer = {
             id: this.playerId,
-            name: `Player ${roomData.players.length + 1}`,
+            name: this.playerName || `Player ${roomData.players.length + 1}`,
             isHost: false,
-            playerNumber: roomData.players.length + 1
+            playerNumber: roomData.players.length + 1,
+            tempId: this.generateTempId()
         };
         
         roomData.players.push(newPlayer);
@@ -1503,7 +1583,12 @@ class PinsGame {
         // Update room data
         localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
         
-        this.showRoomLobby();
+        // If game already started, join the ongoing game
+        if (roomData.gameStarted) {
+            this.joinOngoingGame(roomData);
+        } else {
+            this.showRoomLobby();
+        }
         
         // Cache the room code for quick access
         this.cacheRecentRoomCode(roomCode);
@@ -1556,6 +1641,20 @@ class PinsGame {
         this.roomPlayers = [];
         this.gameState = null;
         this.onlineGameStarted = false;
+        
+        // Clean up timeouts and intervals
+        if (this.startGameTimeout) {
+            clearTimeout(this.startGameTimeout);
+            this.startGameTimeout = null;
+        }
+        if (this.lobbyInterval) {
+            clearInterval(this.lobbyInterval);
+            this.lobbyInterval = null;
+        }
+        if (this.gameInterval) {
+            clearInterval(this.gameInterval);
+            this.gameInterval = null;
+        }
     }
 
     startOnlineGame() {
@@ -1799,8 +1898,10 @@ class PinsGame {
         }
         
         // Update room code display
-        document.getElementById('room-code-text').textContent = this.roomCode;
-        document.getElementById('room-code-large').textContent = this.roomCode;
+        if (this.roomCode) {
+            document.getElementById('room-code-text').textContent = this.roomCode;
+            document.getElementById('room-code-large').textContent = this.roomCode;
+        }
         
         // Update player info
         document.getElementById('lobby-player-info').textContent = 
@@ -1842,17 +1943,39 @@ class PinsGame {
         // Update status
         const statusElement = document.getElementById('lobby-status');
         if (roomData.players.length === roomData.settings.playerCount) {
-            statusElement.textContent = this.isHost ? 'Ready to start!' : 'Waiting for host to start...';
-            
-            // Auto-start if host and room is full
-            if (this.isHost && !roomData.gameStarted) {
-                setTimeout(() => {
-                    this.startOnlineGame();
-                }, 1000);
+            if (roomData.gameStarted) {
+                statusElement.textContent = 'Game in progress...';
+                // If game already started and we're not in game, join it
+                if (!this.onlineGameStarted) {
+                    setTimeout(() => {
+                        this.joinOngoingGame(roomData);
+                    }, 500);
+                }
+            } else {
+                statusElement.textContent = this.isHost ? 'Ready to start!' : 'Waiting for host to start...';
+                
+                // Auto-start if host and room is full (with delay to prevent race conditions)
+                if (this.isHost && !roomData.gameStarted && !this.startGameTimeout) {
+                    this.startGameTimeout = setTimeout(() => {
+                        // Double-check room state before starting
+                        const latestRoomData = this.getRoomData(this.roomCode);
+                        if (latestRoomData && !latestRoomData.gameStarted && 
+                            latestRoomData.players.length === latestRoomData.settings.playerCount) {
+                            this.startOnlineGame();
+                        }
+                        this.startGameTimeout = null;
+                    }, 2000);
+                }
             }
         } else {
             const needed = roomData.settings.playerCount - roomData.players.length;
             statusElement.textContent = `Waiting for ${needed} more player${needed > 1 ? 's' : ''}...`;
+            
+            // Clear any pending start timeout if room is no longer full
+            if (this.startGameTimeout) {
+                clearTimeout(this.startGameTimeout);
+                this.startGameTimeout = null;
+            }
         }
         
         // Check for player changes and show notifications
@@ -2122,6 +2245,16 @@ class PinsGame {
                 if (e.target.id === 'room-code-popup') {
                     document.getElementById('room-code-popup').classList.add('hidden');
                 }
+            });
+        }
+
+        // Menu room code button
+        const menuRoomCodeBtn = document.getElementById('menu-room-code-btn');
+        if (menuRoomCodeBtn) {
+            menuRoomCodeBtn.addEventListener('click', () => {
+                document.getElementById('room-code-popup').classList.remove('hidden');
+                // Update the popup with current room code
+                document.getElementById('room-code-large').textContent = this.roomCode;
             });
         }
 
