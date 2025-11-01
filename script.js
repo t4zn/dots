@@ -2260,7 +2260,7 @@ class PinsGame {
     }
 
     changeStartGridSize(direction) {
-        const sizes = [2, 5, 6, 7, 8];
+        const sizes = [5, 6, 7, 8];
         const currentIndex = sizes.indexOf(this.gridSize);
         let newIndex = currentIndex + direction;
         
@@ -2302,7 +2302,7 @@ class PinsGame {
     }
 
     changeRoomGridSize(direction) {
-        const sizes = [2, 5, 6, 7, 8];
+        const sizes = [5, 6, 7, 8];
         const currentIndex = sizes.indexOf(this.roomSettings.gridSize);
         let newIndex = currentIndex + direction;
         
@@ -2447,7 +2447,7 @@ class PinsGame {
     }
 
     changeComputerGridSize(direction) {
-        const sizes = [2, 5, 6, 7, 8];
+        const sizes = [5, 6, 7, 8];
         const currentIndex = sizes.indexOf(this.gridSize);
         let newIndex = currentIndex + direction;
         
