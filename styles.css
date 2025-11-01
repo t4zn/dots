@@ -1537,15 +1537,18 @@ body.player5-turn .turn-display {
     letter-spacing: 0.3px;
     min-height: 60px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    position: relative;
 }
 
 /* Premium Crown Icon */
 .welcome-option-btn .premium-crown {
-    margin-left: 8px;
-    flex-shrink: 0;
-    width: 12px !important;
-    height: 12px !important;
-    transform: translateY(-2px);
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0;
+    transform: translateY(-50%);
 }
 
 .welcome-option-btn .premium-crown path {
