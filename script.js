@@ -1,6 +1,7 @@
 class PinsGame {
     constructor() {
         this.gridSize = 6; // Default 6x6 grid of dots
+        this.playerCount = 2; // Default 2 players
         this.currentPlayer = 1;
         this.scores = { player1: 0, player2: 0 };
         this.lines = new Set();
@@ -14,13 +15,25 @@ class PinsGame {
         this.gameMode = '2player'; // '2player' or 'bot'
         this.botThinking = false; // Track if bot is thinking
         this.audioContext = null; // Audio context for sound effects
+        this.soundEnabled = true; // Sound effects toggle
+        
+        // Player colors based on player count
+        this.playerColors = {
+            2: ['#3b82f6', '#ef4444'], // Blue, Red
+            3: ['#ef4444', '#3b82f6', '#10b981'], // Red, Blue, Green
+            4: ['#ef4444', '#3b82f6', '#10b981', '#eab308'], // Red, Blue, Green, Yellow
+            5: ['#ef4444', '#3b82f6', '#10b981', '#eab308', '#a855f7'] // Red, Blue, Green, Yellow, Purple
+        };
 
-        this.initializeGame();
         this.setupEventListeners();
         this.initAudio();
     }
 
     initAudio() {
+        this.musicPlaying = false;
+        this.musicGain = null;
+        this.musicOscillators = [];
+        
         // Initialize audio context on first user interaction
         const initContext = () => {
             if (!this.audioContext) {
@@ -40,6 +53,11 @@ class PinsGame {
     }
 
     playSound(type) {
+        // Check if sound is enabled
+        if (!this.soundEnabled) {
+            return;
+        }
+        
         // Try to initialize audio context if not already done
         if (!this.audioContext) {
             try {
@@ -321,7 +339,7 @@ class PinsGame {
 
         // Convert previous latest line to black if it exists
         if (this.lastDrawnLine) {
-            this.lastDrawnLine.classList.remove('player1-line', 'player2-line', 'current-player-line');
+            this.lastDrawnLine.classList.remove('player1-line', 'player2-line', 'player3-line', 'player4-line', 'player5-line', 'current-player-line');
             this.lastDrawnLine.classList.add('drawn');
         }
 
@@ -331,7 +349,7 @@ class PinsGame {
         this.lastDrawnLine = lineElement;
 
         // Remove hover classes and add current player line class
-        lineElement.classList.remove('player1-hover', 'player2-hover');
+        lineElement.classList.remove('player1-hover', 'player2-hover', 'player3-hover', 'player4-hover', 'player5-hover');
         lineElement.classList.add(`player${this.currentPlayer}-line`, 'current-player-line', 'drawn');
 
         // Play line draw sound
@@ -379,7 +397,7 @@ class PinsGame {
 
         // Switch player if no boxes were completed
         if (!playerGetsAnotherTurn) {
-            this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+            this.currentPlayer = (this.currentPlayer % this.playerCount) + 1;
         }
 
         this.updateUI(playerGetsAnotherTurn);
@@ -411,18 +429,23 @@ class PinsGame {
     }
 
     updateUI(skipTurnDisplay = false) {
-        // Old score displays removed - now using left score display only
-
-        // Update left score display with both players' scores
-        const scoreP1 = document.querySelector('.score-p1');
-        const scoreP2 = document.querySelector('.score-p2');
-        if (scoreP1 && scoreP2) {
-            scoreP1.textContent = this.scores.player1;
-            scoreP2.textContent = this.scores.player2;
+        // Update score display
+        const scoreDisplay = document.getElementById('score-display-left');
+        if (scoreDisplay) {
+            let scoreHTML = '';
+            for (let i = 1; i <= this.playerCount; i++) {
+                const color = this.getPlayerColor(i);
+                scoreHTML += `<span class="score-p${i}" style="color: ${color};">${this.scores[`player${i}`]}</span>`;
+                if (i < this.playerCount) {
+                    scoreHTML += '<span class="score-dot">•</span>';
+                }
+            }
+            scoreDisplay.innerHTML = scoreHTML;
         }
 
         // Update body background based on current player
         document.body.className = `player${this.currentPlayer}-turn`;
+        document.body.setAttribute('data-player-count', this.playerCount);
 
         // Update hover classes for all undrawn lines
         this.updateLineHoverClasses();
@@ -437,7 +460,8 @@ class PinsGame {
         // Update hover classes for all lines that haven't been drawn yet
         const lines = document.querySelectorAll('.line:not(.drawn)');
         lines.forEach(line => {
-            line.classList.remove('player1-hover', 'player2-hover');
+            // Remove all possible player hover classes
+            line.classList.remove('player1-hover', 'player2-hover', 'player3-hover', 'player4-hover', 'player5-hover');
             line.classList.add(`player${this.currentPlayer}-hover`);
         });
     }
@@ -520,7 +544,7 @@ class PinsGame {
 
         // Convert previous latest line to black if it exists
         if (this.lastDrawnLine) {
-            this.lastDrawnLine.classList.remove('player1-line', 'player2-line', 'current-player-line');
+            this.lastDrawnLine.classList.remove('player1-line', 'player2-line', 'player3-line', 'player4-line', 'player5-line', 'current-player-line');
             this.lastDrawnLine.classList.add('drawn');
         }
 
@@ -530,7 +554,7 @@ class PinsGame {
         this.lastDrawnLine = lineElement;
 
         // Style the line
-        lineElement.classList.remove('player1-hover', 'player2-hover');
+        lineElement.classList.remove('player1-hover', 'player2-hover', 'player3-hover', 'player4-hover', 'player5-hover');
         lineElement.classList.add(`player${this.currentPlayer}-line`, 'current-player-line', 'drawn');
 
         // Animate
@@ -613,38 +637,45 @@ class PinsGame {
         const winScreen = document.getElementById('win-screen');
         const winText = document.getElementById('win-text');
 
-        let winningPlayer = null;
+        // Find winner(s)
+        let maxScore = 0;
+        let winners = [];
+        
+        for (let i = 1; i <= this.playerCount; i++) {
+            const score = this.scores[`player${i}`];
+            if (score > maxScore) {
+                maxScore = score;
+                winners = [i];
+            } else if (score === maxScore) {
+                winners.push(i);
+            }
+        }
+
         let winColor = '';
         let winColorName = '';
 
-        if (this.scores.player1 > this.scores.player2) {
-            winningPlayer = 1;
+        if (winners.length === 1) {
+            const winningPlayer = winners[0];
+            winColor = this.getPlayerColor(winningPlayer);
             
-            // Get color based on theme
-            if (this.colorTheme === 'green-purple') {
-                winColor = '#10b981';
-                winColorName = 'GREEN';
-            } else if (this.colorTheme === 'pink-grey') {
-                winColor = '#ec4899';
-                winColorName = 'PINK';
-            } else {
-                winColor = '#3b82f6';
-                winColorName = 'BLUE';
-            }
-        } else if (this.scores.player2 > this.scores.player1) {
-            winningPlayer = 2;
+            // Get color name
+            const colorNames = {
+                2: ['BLUE', 'RED'],
+                3: ['RED', 'BLUE', 'GREEN'],
+                4: ['RED', 'BLUE', 'GREEN', 'YELLOW'],
+                5: ['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE']
+            };
             
-            // Get color based on theme
-            if (this.colorTheme === 'green-purple') {
-                winColor = '#a855f7';
-                winColorName = 'PURPLE';
-            } else if (this.colorTheme === 'pink-grey') {
-                winColor = '#6b7280';
-                winColorName = 'GREY';
-            } else {
-                winColor = '#ef4444';
-                winColorName = 'RED';
+            // Handle 2-player themes
+            if (this.playerCount === 2) {
+                if (this.colorTheme === 'green-purple') {
+                    colorNames[2] = ['GREEN', 'PURPLE'];
+                } else if (this.colorTheme === 'pink-grey') {
+                    colorNames[2] = ['PINK', 'GREY'];
+                }
             }
+            
+            winColorName = colorNames[this.playerCount][winningPlayer - 1];
         } else {
             winColor = '#636e72';
             winColorName = 'DRAW';
@@ -657,17 +688,17 @@ class PinsGame {
         winScreen.style.background = winColor;
         winText.innerHTML = `${winColorName}<br>WINS`;
         winScreen.classList.remove('hidden');
-
-        // Hide win screen after 2 seconds and restart game
-        setTimeout(() => {
-            winScreen.classList.add('hidden');
-            this.restartGame();
-        }, 2000);
     }
 
     restartGame() {
         this.currentPlayer = 1;
-        this.scores = { player1: 0, player2: 0 };
+        
+        // Reset scores for all players
+        this.scores = {};
+        for (let i = 1; i <= this.playerCount; i++) {
+            this.scores[`player${i}`] = 0;
+        }
+        
         this.lines.clear();
         this.drawnLines.clear();
         this.lastDrawnLine = null;
@@ -684,6 +715,7 @@ class PinsGame {
         document.getElementById('game-over-modal').classList.add('hidden');
         document.getElementById('menu-modal').classList.add('hidden');
         document.body.className = 'player1-turn'; // Reset to player 1
+        document.body.setAttribute('data-player-count', this.playerCount);
         this.initializeGame();
     }
 
@@ -705,6 +737,9 @@ class PinsGame {
     }
 
     changeColorTheme(theme) {
+        // Only allow theme changes for 2 players
+        if (this.playerCount !== 2) return;
+        
         this.colorTheme = theme;
         document.body.setAttribute('data-theme', theme);
 
@@ -717,6 +752,29 @@ class PinsGame {
         });
     }
 
+    toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        const btn = document.getElementById('sound-toggle-btn');
+        
+        if (this.soundEnabled) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    }
+
+    getPlayerColor(playerNum) {
+        if (this.playerCount === 2 && this.colorTheme !== 'blue-red') {
+            // Use theme colors for 2 players
+            const themeColors = {
+                'green-purple': ['#10b981', '#a855f7'],
+                'pink-grey': ['#ec4899', '#6b7280']
+            };
+            return themeColors[this.colorTheme]?.[playerNum - 1] || this.playerColors[2][playerNum - 1];
+        }
+        return this.playerColors[this.playerCount][playerNum - 1];
+    }
+
     showMenu() {
         document.getElementById('menu-modal').classList.remove('hidden');
     }
@@ -726,6 +784,29 @@ class PinsGame {
     }
 
     setupEventListeners() {
+        // Start screen buttons
+        document.getElementById('start-game-btn').addEventListener('click', () => {
+            this.startGame();
+        });
+
+        // Grid size navigation arrows
+        document.getElementById('grid-prev').addEventListener('click', () => {
+            this.changeStartGridSize(-1);
+        });
+
+        document.getElementById('grid-next').addEventListener('click', () => {
+            this.changeStartGridSize(1);
+        });
+
+        // Player count navigation arrows
+        document.getElementById('player-prev').addEventListener('click', () => {
+            this.changePlayerCount(-1);
+        });
+
+        document.getElementById('player-next').addEventListener('click', () => {
+            this.changePlayerCount(1);
+        });
+
         // Menu buttons
         document.getElementById('menu-btn').addEventListener('click', () => {
             this.showMenu();
@@ -742,8 +823,23 @@ class PinsGame {
             this.restartGame();
         });
 
+        document.getElementById('return-home-btn').addEventListener('click', () => {
+            this.returnToHome();
+        });
+
         document.getElementById('play-again-btn').addEventListener('click', () => {
             this.restartGame();
+        });
+
+        // Win screen buttons
+        document.getElementById('win-play-again-btn').addEventListener('click', () => {
+            document.getElementById('win-screen').classList.add('hidden');
+            this.restartGame();
+        });
+
+        document.getElementById('win-main-menu-btn').addEventListener('click', () => {
+            document.getElementById('win-screen').classList.add('hidden');
+            this.returnToHome();
         });
 
         // Grid size buttons
@@ -762,6 +858,11 @@ class PinsGame {
             });
         });
 
+        // Sound toggle button
+        document.getElementById('sound-toggle-btn').addEventListener('click', () => {
+            this.toggleSound();
+        });
+
         // Close modals when clicking outside
         document.getElementById('game-over-modal').addEventListener('click', (e) => {
             if (e.target.id === 'game-over-modal') {
@@ -774,6 +875,87 @@ class PinsGame {
                 this.hideMenu();
             }
         });
+    }
+
+    changeStartGridSize(direction) {
+        const sizes = [2, 5, 6, 7, 8];
+        const currentIndex = sizes.indexOf(this.gridSize);
+        let newIndex = currentIndex + direction;
+        
+        // Wrap around
+        if (newIndex < 0) newIndex = sizes.length - 1;
+        if (newIndex >= sizes.length) newIndex = 0;
+        
+        this.gridSize = sizes[newIndex];
+        document.getElementById('grid-size-display').textContent = `${this.gridSize}×${this.gridSize}`;
+    }
+
+    changePlayerCount(direction) {
+        const counts = [2, 3, 4, 5];
+        const currentIndex = counts.indexOf(this.playerCount);
+        let newIndex = currentIndex + direction;
+        
+        // Wrap around
+        if (newIndex < 0) newIndex = counts.length - 1;
+        if (newIndex >= counts.length) newIndex = 0;
+        
+        this.playerCount = counts[newIndex];
+        document.getElementById('player-count-display').textContent = this.playerCount;
+    }
+
+    startGame() {
+        // Initialize scores for all players
+        this.scores = {};
+        for (let i = 1; i <= this.playerCount; i++) {
+            this.scores[`player${i}`] = 0;
+        }
+        
+        // Hide/show color theme section based on player count
+        const colorThemeSection = document.getElementById('color-theme-section');
+        if (colorThemeSection) {
+            if (this.playerCount > 2) {
+                colorThemeSection.style.display = 'none';
+            } else {
+                colorThemeSection.style.display = 'block';
+            }
+        }
+        
+        document.getElementById('start-screen').classList.add('hidden');
+        document.querySelector('.game-container').classList.remove('hidden');
+        this.initializeGame();
+        
+        // Start background music
+        this.startBackgroundMusic();
+    }
+
+    returnToHome() {
+        // Reset game state
+        this.currentPlayer = 1;
+        this.scores = {};
+        this.lines.clear();
+        this.drawnLines.clear();
+        this.lastDrawnLine = null;
+        this.boxes = [];
+        this.gameOver = false;
+        this.gameStarted = false;
+
+        // Clear any existing turn text timeout
+        if (this.turnTextTimeout) {
+            clearTimeout(this.turnTextTimeout);
+            this.turnTextTimeout = null;
+        }
+
+        // Hide all modals and game container
+        document.getElementById('menu-modal').classList.add('hidden');
+        document.getElementById('game-over-modal').classList.add('hidden');
+        document.querySelector('.game-container').classList.add('hidden');
+        
+        // Show start screen
+        document.getElementById('start-screen').classList.remove('hidden');
+        
+        // Reset body class
+        document.body.className = '';
+        document.body.removeAttribute('data-player-count');
     }
 }
 

@@ -10,7 +10,65 @@
 </head>
 
 <body>
-    <div class="game-container">
+    <!-- Start Screen -->
+    <div id="start-screen" class="start-screen">
+        <div class="start-content">
+            <div class="logo-container">
+                <img src="favicon.ico" alt="Dots & Boxes" class="logo-icon">
+            </div>
+            <h1 class="game-title">Dots & Boxes</h1>
+            <p class="game-subtitle">A classic strategy game of connecting dots</p>
+            
+            <div class="divider"></div>
+            
+            <div class="start-options">
+                <label class="grid-label">Number of Players</label>
+                <div class="player-count-selector">
+                    <button class="grid-arrow" id="player-prev" aria-label="Previous player count">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div class="grid-size-display" id="player-count-display">2</div>
+                    <button class="grid-arrow" id="player-next" aria-label="Next player count">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="start-options">
+                <label class="grid-label">Grid Size</label>
+                <div class="grid-size-selector">
+                    <button class="grid-arrow" id="grid-prev" aria-label="Previous size">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div class="grid-size-display" id="grid-size-display">6×6</div>
+                    <button class="grid-arrow" id="grid-next" aria-label="Next size">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <button id="start-game-btn" class="start-btn">
+                <span>Start Game</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+            
+            <div class="start-footer">
+                <p>© 2025 Taizun. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-container hidden">
         <!-- Player 2 Score (Top, Inverted) -->
         <div class="player-score-display player2-score-display" id="player2-indicator">
             <span class="score-text" id="player2-score">0</span>
@@ -67,18 +125,9 @@
                 <div class="menu-options">
                     <button id="resume-btn" class="menu-option-btn">Resume Game</button>
                     <button id="restart-game-btn" class="menu-option-btn">Restart Game</button>
+                    <button id="return-home-btn" class="menu-option-btn">Return to Home</button>
 
-                    <div class="grid-size-section">
-                        <h3>Grid Size</h3>
-                        <div class="grid-size-options">
-                            <button class="grid-size-btn" data-size="5">5×5</button>
-                            <button class="grid-size-btn active" data-size="6">6×6</button>
-                            <button class="grid-size-btn" data-size="7">7×7</button>
-                            <button class="grid-size-btn" data-size="8">8×8</button>
-                        </div>
-                    </div>
-
-                    <div class="grid-size-section">
+                    <div class="grid-size-section" id="color-theme-section">
                         <h3>Color Theme</h3>
                         <div class="color-theme-options">
                             <button class="color-theme-btn active" data-theme="blue-red">
@@ -95,6 +144,14 @@
                             </button>
                         </div>
                     </div>
+
+                    <button class="sound-toggle-btn active" id="sound-toggle-btn" aria-label="Toggle sound effects">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path class="sound-waves" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            <path class="sound-waves" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -111,6 +168,10 @@
         <div id="win-screen" class="win-screen hidden">
             <div class="win-message">
                 <div class="win-text" id="win-text">RED<br>WINS</div>
+                <div class="win-actions">
+                    <button id="win-play-again-btn" class="win-action-btn">Play Again</button>
+                    <button id="win-main-menu-btn" class="win-action-btn win-action-btn-secondary">Main Menu</button>
+                </div>
             </div>
         </div>
     </div>
