@@ -252,6 +252,8 @@ class PinsGame {
     }
 
     initializeGame() {
+        // Ensure colors are properly reset
+        this.resetColorTheme();
         this.createGrid();
         this.updateUI();
     }
@@ -511,13 +513,13 @@ class PinsGame {
     }
 
     updateUI(skipTurnDisplay = false) {
-        // Update score display
+        // Update score display with forced color application
         const scoreDisplay = document.getElementById('score-display-left');
         if (scoreDisplay) {
             let scoreHTML = '';
             for (let i = 1; i <= this.playerCount; i++) {
                 const color = this.getPlayerColor(i);
-                scoreHTML += `<span class="score-p${i}" style="color: ${color};">${this.scores[`player${i}`]}</span>`;
+                scoreHTML += `<span class="score-p${i}" style="color: ${color} !important;">${this.scores[`player${i}`]}</span>`;
                 if (i < this.playerCount) {
                     scoreHTML += '<span class="score-dot">•</span>';
                 }
@@ -525,9 +527,16 @@ class PinsGame {
             scoreDisplay.innerHTML = scoreHTML;
         }
 
-        // Update body background based on current player
+        // Update body background based on current player with proper theme
         document.body.className = `player${this.currentPlayer}-turn`;
         document.body.setAttribute('data-player-count', this.playerCount);
+        
+        // Ensure theme is properly set
+        if (this.playerCount === 2 && this.colorTheme !== 'blue-red') {
+            document.body.setAttribute('data-theme', this.colorTheme);
+        } else {
+            document.body.removeAttribute('data-theme');
+        }
 
         // Update hover classes for all undrawn lines
         this.updateLineHoverClasses();
@@ -875,6 +884,9 @@ class PinsGame {
             this.turnTextTimeout = null;
         }
 
+        // Force color theme reset
+        this.resetColorTheme();
+
         document.getElementById('game-over-modal').classList.add('hidden');
         document.getElementById('menu-modal').classList.add('hidden');
         document.body.className = 'player1-turn'; // Reset to player 1
@@ -940,6 +952,41 @@ class PinsGame {
             return themeColors[this.colorTheme]?.[playerNum - 1] || this.playerColors[2][playerNum - 1];
         }
         return this.playerColors[this.playerCount][playerNum - 1];
+    }
+
+    resetColorTheme() {
+        // Clear any existing player turn classes that might conflict
+        document.body.className = '';
+        
+        // Force reset color theme to prevent cache conflicts
+        if (this.playerCount !== 2) {
+            // For 3+ players, always use default theme
+            this.colorTheme = 'blue-red';
+            document.body.removeAttribute('data-theme');
+        } else {
+            // For 2 players, ensure theme is properly applied
+            document.body.setAttribute('data-theme', this.colorTheme);
+        }
+        
+        // Set player count and current player turn
+        document.body.setAttribute('data-player-count', this.playerCount);
+        document.body.classList.add(`player${this.currentPlayer}-turn`);
+        
+        // Clear any lingering line classes from previous games
+        document.querySelectorAll('.line').forEach(line => {
+            line.className = line.className.replace(/player\d+-(line|hover)/g, '');
+            if (!line.classList.contains('drawn')) {
+                line.classList.add(`player${this.currentPlayer}-hover`);
+            }
+        });
+        
+        // Update theme buttons
+        document.querySelectorAll('.color-theme-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.theme === this.colorTheme) {
+                btn.classList.add('active');
+            }
+        });
     }
 
     showMenu() {
@@ -2695,6 +2742,10 @@ class PinsGame {
         if (newIndex >= counts.length) newIndex = 0;
         
         this.playerCount = counts[newIndex];
+        
+        // Reset color theme when player count changes
+        this.resetColorTheme();
+        
         document.getElementById('player-count-display').textContent = this.playerCount;
         this.saveCachedSettings();
     }
@@ -4975,6 +5026,25 @@ class PinsGame {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // Force refresh colors - call this if colors get messed up
+    forceColorRefresh() {
+        console.log('Force refreshing colors...');
+        
+        // Clear all cached styles
+        document.body.className = '';
+        document.body.removeAttribute('data-theme');
+        document.body.removeAttribute('data-player-count');
+        
+        // Force a repaint
+        document.body.offsetHeight;
+        
+        // Reapply everything
+        this.resetColorTheme();
+        this.updateUI();
+        
+        console.log('Color refresh complete');
     }
 }
 
