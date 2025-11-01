@@ -1368,16 +1368,28 @@ class PinsGame {
     showPrivacy() {
         const modal = document.getElementById('privacy-modal');
         if (modal) {
-            modal.style.display = 'flex';
-            modal.style.zIndex = '50000';
+            // Force remove hidden class first
+            modal.classList.remove('hidden');
+            
+            // Force all styles to ensure it appears on top
+            modal.style.display = 'flex !important';
+            modal.style.zIndex = '999999';
             modal.style.position = 'fixed';
             modal.style.top = '0';
             modal.style.left = '0';
             modal.style.width = '100%';
             modal.style.height = '100%';
             modal.style.background = 'rgba(0, 0, 0, 0.8)';
-            modal.classList.remove('hidden');
-            console.log('Privacy modal shown with z-index 50000');
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            
+            // Ensure settings modal is behind
+            const settingsModal = document.getElementById('settings-modal');
+            if (settingsModal) {
+                settingsModal.style.zIndex = '10000';
+            }
+            
+            console.log('Privacy modal forced to top with z-index 999999');
         }
     }
 

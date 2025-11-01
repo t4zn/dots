@@ -566,7 +566,7 @@ body[data-theme="pink-grey"] .player2-box {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 20000;
+    z-index: 10000;
 }
 
 .modal.hidden {
@@ -2033,7 +2033,7 @@ Start Screen */
     }
 
     #settings-modal {
-        z-index: 20000;
+        z-index: 10000 !important;
     }
 
     .settings-header {
@@ -2249,8 +2249,23 @@ Start Screen */
 
     /* Privacy Modal */
     #privacy-modal {
-        z-index: 50000 !important;
+        z-index: 999999 !important;
         background: rgba(0, 0, 0, 0.8) !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #privacy-modal.hidden {
+        display: none !important;
+    }
+
+    #privacy-modal:not(.hidden) {
+        display: flex !important;
     }
 
     .privacy-modal-content {
@@ -2261,7 +2276,7 @@ Start Screen */
         padding: 20px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
         position: relative;
-        z-index: 55000 !important;
+        z-index: 999999 !important;
     }
 
     .privacy-header {
