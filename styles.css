@@ -1544,7 +1544,7 @@ body.player5-turn .turn-display {
 .welcome-option-btn .premium-crown {
     position: absolute;
     top: 50%;
-    right: 16px;
+    right: 24px;
     width: 20px !important;
     height: 20px !important;
     margin: 0;
@@ -1686,6 +1686,104 @@ body.player5-turn .turn-display {
 @media (min-width: 769px) {
     .download-app-btn {
         display: none !important; /* Hide on desktop */
+    }
+}
+
+/* Premium Popup Styles */
+.premium-popup-content {
+    max-width: 350px;
+    padding: 30px 25px 25px;
+    text-align: center;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid #ffd700;
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+    position: relative;
+}
+
+.premium-close-x {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    color: #636e72;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.premium-close-x:hover {
+    background: #f1f3f5;
+    color: #2d3436;
+}
+
+.premium-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.premium-popup-crown {
+    flex-shrink: 0;
+}
+
+.premium-popup-crown path,
+.premium-popup-crown circle {
+    fill: #ffd700 !important;
+    stroke: #ffd700 !important;
+}
+
+.premium-header h2 {
+    color: #2d3436;
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.premium-content {
+    margin-bottom: 0;
+}
+
+.lock-icon {
+    margin: 0 auto 20px;
+    color: #636e72;
+    opacity: 0.8;
+}
+
+.premium-content p {
+    color: #636e72;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 8px 0;
+}
+
+.premium-content p:first-of-type {
+    font-weight: 600;
+    color: #2d3436;
+}
+
+
+
+@media (max-width: 480px) {
+    .premium-popup-content {
+        max-width: 300px;
+        padding: 25px 20px 20px;
+    }
+    
+    .premium-header h2 {
+        font-size: 20px;
+    }
+    
+    .premium-close-x {
+        top: 8px;
+        right: 8px;
     }
 }
 
