@@ -3,7 +3,7 @@ class PinsGame {
         this.gridSize = 6; // Default 6x6 grid of dots
         this.playerCount = 2; // Default 2 players
         this.currentPlayer = 1;
-        this.scores = { player1: 0, player2: 0 };
+        this.scores = {};
         this.lines = new Set();
         this.drawnLines = new Map(); // Track which player drew each line
         this.lastDrawnLine = null; // Track the most recent line
@@ -16,6 +16,11 @@ class PinsGame {
         this.botThinking = false; // Track if bot is thinking
         this.audioContext = null; // Audio context for sound effects
         this.soundEnabled = true; // Sound effects toggle
+        
+        // Initialize scores for default player count
+        for (let i = 1; i <= this.playerCount; i++) {
+            this.scores[`player${i}`] = 0;
+        }
         
         // Player colors based on player count
         this.playerColors = {
