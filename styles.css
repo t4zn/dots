@@ -1626,14 +1626,16 @@ body.player5-turn .turn-display {
 /* Icon colors - white for all buttons */
 #play-computer-btn svg,
 #play-friends-btn svg,
-#play-online-btn svg {
+#play-online-btn svg,
+#play-offline-btn svg {
     color: #ffffff;
 }
 
 /* Default: stroke for paths, no fill */
 #play-computer-btn svg path,
 #play-friends-btn svg path,
-#play-online-btn svg path {
+#play-online-btn svg path,
+#play-offline-btn svg:not(.android-icon) path {
     stroke: currentColor !important;
     fill: none !important;
 }
@@ -1644,10 +1646,67 @@ body.player5-turn .turn-display {
     stroke: #ffd700 !important;
 }
 
+/* Play Offline Button - Black theme, mobile only */
+#play-offline-btn {
+    background: #000000;
+    border-color: #000000;
+    color: #ffffff;
+    display: none; /* Hidden by default */
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 32px;
+}
+
+#play-offline-btn:hover {
+    background: #1f2937;
+    border-color: #1f2937;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.play-offline-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.play-offline-content span:first-child {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.download-text {
+    font-size: 10px;
+    font-weight: 400;
+    opacity: 0.7;
+    line-height: 1;
+}
+
+.android-icon {
+    color: #ffffff !important;
+    flex-shrink: 0;
+}
+
+.android-icon path {
+    fill: currentColor !important;
+}
+
+/* Show Play Offline button only on mobile devices */
+@media (max-width: 768px) {
+    #play-offline-btn {
+        display: flex !important;
+    }
+}
+
 /* Circles should be filled white (for heads and wifi dot) */
 #play-computer-btn svg circle,
 #play-friends-btn svg circle,
-#play-online-btn svg circle {
+#play-online-btn svg circle,
+#play-offline-btn svg circle {
     fill: currentColor !important;
     stroke: none !important;
 }

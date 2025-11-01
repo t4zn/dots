@@ -2295,6 +2295,13 @@ class PinsGame {
             });
         }
 
+        const playOfflineBtn = document.getElementById('play-offline-btn');
+        if (playOfflineBtn) {
+            playOfflineBtn.addEventListener('click', () => {
+                this.downloadApp();
+            });
+        }
+
 
 
         // Premium popup close button
@@ -4907,6 +4914,33 @@ class PinsGame {
         const popup = document.getElementById('premium-popup');
         if (popup) {
             popup.classList.add('hidden');
+        }
+    }
+
+    downloadApp() {
+        // Check if running on Android
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const isAndroid = /android/i.test(userAgent);
+        
+        if (isAndroid) {
+            // Try to open the app if installed, otherwise redirect to Play Store
+            const appUrl = 'intent://dots.taizun.site#Intent;scheme=https;package=com.taizun.dotsboxes;end';
+            const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.taizun.dotsboxes';
+            
+            // Create a hidden iframe to try opening the app
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = appUrl;
+            document.body.appendChild(iframe);
+            
+            // Fallback to Play Store after a short delay
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+                window.open(playStoreUrl, '_blank');
+            }, 1000);
+        } else {
+            // For non-Android devices, show a message or redirect to a general download page
+            alert('Download the Dots & Boxes app from your device\'s app store for the best offline experience!');
         }
     }
 }
