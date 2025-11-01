@@ -969,20 +969,20 @@ body.player2-turn .turn-display {
 }
 
 body.player3-turn .turn-display {
-    left: 80px;
+    left: 120px;
     top: 50%;
     transform: translateY(-50%) rotate(-90deg);
 }
 
 body.player4-turn .turn-display {
-    right: 80px;
+    right: 120px;
     left: auto;
     top: 50%;
     transform: translateY(-50%) rotate(90deg);
 }
 
 body.player5-turn .turn-display {
-    bottom: 80px;
+    bottom: 120px;
     left: 50%;
     transform: translateX(-50%);
 }
@@ -1001,15 +1001,15 @@ body.player5-turn .turn-display {
     }
 
     body.player3-turn .turn-display {
-        left: 15%;
+        left: 20%;
     }
 
     body.player4-turn .turn-display {
-        right: 15%;
+        right: 20%;
     }
 
     body.player5-turn .turn-display {
-        bottom: 15%;
+        bottom: 20%;
     }
 }
 
@@ -1027,15 +1027,15 @@ body.player5-turn .turn-display {
     }
 
     body.player3-turn .turn-display {
-        left: 12%;
+        left: 18%;
     }
 
     body.player4-turn .turn-display {
-        right: 12%;
+        right: 18%;
     }
 
     body.player5-turn .turn-display {
-        bottom: 12%;
+        bottom: 18%;
     }
 }
 
