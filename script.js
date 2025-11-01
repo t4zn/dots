@@ -11,13 +11,13 @@ class PinsGame {
         this.gameOver = false;
         this.gameStarted = false;
         this.turnTextTimeout = null; // Track timeout for turn text
-        this.colorTheme = 'blue-red'; // Default color theme
+        this.colorTheme = 'blue-red'; // Always reset to default theme
         this.gameMode = '2player'; // '2player' or 'bot'
         this.botThinking = false; // Track if bot is thinking
         this.botMakingMove = false; // Track if bot is currently making a move
-        this.difficulty = 'easy'; // 'easy', 'medium', 'hard'
+        this.difficulty = 'easy'; // 'easy', 'medium', 'hard' - always reset to easy
         this.audioContext = null; // Audio context for sound effects
-        this.soundEnabled = true; // Sound effects toggle
+        this.soundEnabled = true; // Sound effects toggle - always enabled
         
         // Online multiplayer properties
         this.isOnlineMode = false;
@@ -27,17 +27,17 @@ class PinsGame {
         this.roomPlayers = [];
         this.previousPlayerCount = 0;
         this.roomSettings = {
-            playerCount: 2,
-            gridSize: 6
+            playerCount: 2, // Always reset to 2
+            gridSize: 6 // Always reset to 6
         };
         this.gameState = null;
         this.onlineGameStarted = false;
         this.startGameTimeout = null;
         
-        // Settings properties
+        // Settings properties - will be loaded from cache
         this.playerName = 'Player';
         this.selectedCountry = { code: 'US', name: 'United States', flag: '🇺🇸' };
-        this.volume = 100;
+        this.volume = 100; // Always reset to 100
         
         // Initialize scores for default player count
         for (let i = 1; i <= this.playerCount; i++) {
@@ -61,7 +61,8 @@ class PinsGame {
         
         // Update UI after DOM is ready
         setTimeout(() => {
-            this.updateUIWithCachedSettings();
+            this.resetAllUIToDefaults();
+            this.updateUIWithCachedSettings(); // Only updates name and country
             
             // Additional settings button setup as fallback
             const settingsBtn = document.getElementById('settings-btn');
@@ -925,8 +926,6 @@ class PinsGame {
                 btn.classList.add('active');
             }
         });
-        
-        this.saveCachedSettings();
     }
 
     toggleSound() {
@@ -938,8 +937,6 @@ class PinsGame {
         } else {
             btn.classList.remove('active');
         }
-        
-        this.saveCachedSettings();
     }
 
     getPlayerColor(playerNum) {
@@ -1088,30 +1085,19 @@ class PinsGame {
         }
     }
 
-    // Caching Methods
+    // Minimal Caching Methods - Only name and country
     loadCachedSettings(updateUI = true) {
         try {
-            const cachedSettings = localStorage.getItem('dotsBoxesSettings');
+            // Clear old cache key to prevent conflicts
+            localStorage.removeItem('dotsBoxesSettings');
+            
+            const cachedSettings = localStorage.getItem('dotsBoxesUserSettings');
             if (cachedSettings) {
                 const settings = JSON.parse(cachedSettings);
                 
-                // Load game settings
-                this.gridSize = settings.gridSize || 6;
-                this.playerCount = settings.playerCount || 2;
-                this.difficulty = settings.difficulty || 'easy';
-                this.colorTheme = settings.colorTheme || 'blue-red';
-                this.soundEnabled = settings.soundEnabled !== undefined ? settings.soundEnabled : true;
-                
-                // Load user settings
+                // Only load user identity settings
                 this.playerName = settings.playerName || 'Player';
                 this.selectedCountry = settings.selectedCountry || { code: 'US', name: 'United States', flag: '🇺🇸' };
-                this.volume = settings.volume !== undefined ? settings.volume : 100;
-                
-                // Load room settings
-                this.roomSettings = {
-                    playerCount: settings.roomPlayerCount || 2,
-                    gridSize: settings.roomGridSize || 6
-                };
                 
                 // Update UI elements with cached values only if requested
                 if (updateUI) {
@@ -1126,20 +1112,12 @@ class PinsGame {
     saveCachedSettings() {
         try {
             const settings = {
-                gridSize: this.gridSize,
-                playerCount: this.playerCount,
-                difficulty: this.difficulty,
-                colorTheme: this.colorTheme,
-                soundEnabled: this.soundEnabled,
                 playerName: this.playerName,
                 selectedCountry: this.selectedCountry,
-                volume: this.volume,
-                roomPlayerCount: this.roomSettings.playerCount,
-                roomGridSize: this.roomSettings.gridSize,
                 lastUpdated: Date.now()
             };
             
-            localStorage.setItem('dotsBoxesSettings', JSON.stringify(settings));
+            localStorage.setItem('dotsBoxesUserSettings', JSON.stringify(settings));
         } catch (e) {
             console.warn('Failed to save settings:', e);
         }
@@ -1153,61 +1131,80 @@ class PinsGame {
         difficultyDisplay.classList.add(`difficulty-${this.difficulty}`);
     }
 
-    updateUIWithCachedSettings() {
-        // Update main game settings displays
+    resetAllUIToDefaults() {
+        // Reset all game settings to defaults
+        
+        // Main game settings
         const gridDisplay = document.getElementById('grid-size-display');
         if (gridDisplay) {
-            gridDisplay.textContent = `${this.gridSize}×${this.gridSize}`;
+            gridDisplay.textContent = '6×6';
         }
         
         const playerDisplay = document.getElementById('player-count-display');
         if (playerDisplay) {
-            playerDisplay.textContent = this.playerCount;
+            playerDisplay.textContent = '2';
         }
         
+        // Computer game settings
         const computerGridDisplay = document.getElementById('computer-grid-size-display');
         if (computerGridDisplay) {
-            computerGridDisplay.textContent = `${this.gridSize}×${this.gridSize}`;
+            computerGridDisplay.textContent = '6×6';
         }
         
         const difficultyDisplay = document.getElementById('difficulty-display');
         if (difficultyDisplay) {
-            const difficulties = ['Easy', 'Medium', 'Hard', 'Expert'];
-            const difficultyIndex = ['easy', 'medium', 'hard', 'expert'].indexOf(this.difficulty);
-            difficultyDisplay.textContent = difficulties[difficultyIndex] || 'Easy';
-            
-            // Update difficulty color class
-            this.updateDifficultyColor(difficultyDisplay);
+            difficultyDisplay.textContent = 'Easy';
+            difficultyDisplay.className = 'grid-size-display difficulty-easy';
         }
         
-        // Update room settings displays
+        // Room settings
         const roomPlayerDisplay = document.getElementById('room-player-count-display');
         if (roomPlayerDisplay) {
-            roomPlayerDisplay.textContent = this.roomSettings.playerCount;
+            roomPlayerDisplay.textContent = '2';
         }
         
         const roomGridDisplay = document.getElementById('room-grid-size-display');
         if (roomGridDisplay) {
-            roomGridDisplay.textContent = `${this.roomSettings.gridSize}×${this.roomSettings.gridSize}`;
+            roomGridDisplay.textContent = '6×6';
         }
         
-        // Update color theme
-        document.body.setAttribute('data-theme', this.colorTheme);
+        // Color theme - always blue-red
+        document.body.removeAttribute('data-theme');
         document.querySelectorAll('.color-theme-btn').forEach(btn => {
             btn.classList.remove('active');
-            if (btn.dataset.theme === this.colorTheme) {
+            if (btn.dataset.theme === 'blue-red') {
                 btn.classList.add('active');
             }
         });
         
-        // Update sound toggle
+        // Sound - always enabled
         const soundBtn = document.getElementById('sound-toggle-btn');
         if (soundBtn) {
-            if (this.soundEnabled) {
-                soundBtn.classList.add('active');
-            } else {
-                soundBtn.classList.remove('active');
-            }
+            soundBtn.classList.add('active');
+        }
+        
+        // Volume - always 100%
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeValue = document.getElementById('volume-value');
+        if (volumeSlider) volumeSlider.value = '100';
+        if (volumeValue) volumeValue.textContent = '100%';
+    }
+
+    updateUIWithCachedSettings() {
+        // Only update user identity settings from cache
+        
+        // Update player name
+        const playerNameInput = document.getElementById('player-name-input');
+        if (playerNameInput) {
+            playerNameInput.value = this.playerName;
+        }
+        
+        // Update country selection
+        const selectedFlag = document.getElementById('selected-flag');
+        const selectedCountry = document.getElementById('selected-country');
+        if (selectedFlag && selectedCountry) {
+            selectedFlag.textContent = this.selectedCountry.flag;
+            selectedCountry.textContent = this.selectedCountry.name;
         }
     }
 
@@ -1508,7 +1505,6 @@ class PinsGame {
     updateVolume(value) {
         this.volume = parseInt(value);
         document.getElementById('volume-value').textContent = `${this.volume}%`;
-        this.saveCachedSettings();
         
         // Update audio context volume if available
         if (this.audioContext && this.audioContext.state === 'running') {
@@ -2729,7 +2725,6 @@ class PinsGame {
         
         this.gridSize = sizes[newIndex];
         document.getElementById('grid-size-display').textContent = `${this.gridSize}×${this.gridSize}`;
-        this.saveCachedSettings();
     }
 
     changePlayerCount(direction) {
@@ -2747,7 +2742,6 @@ class PinsGame {
         this.resetColorTheme();
         
         document.getElementById('player-count-display').textContent = this.playerCount;
-        this.saveCachedSettings();
     }
 
     changeRoomPlayerCount(direction) {
@@ -2761,7 +2755,6 @@ class PinsGame {
         
         this.roomSettings.playerCount = counts[newIndex];
         document.getElementById('room-player-count-display').textContent = this.roomSettings.playerCount;
-        this.saveCachedSettings();
     }
 
     changeRoomGridSize(direction) {
@@ -2775,7 +2768,6 @@ class PinsGame {
         
         this.roomSettings.gridSize = sizes[newIndex];
         document.getElementById('room-grid-size-display').textContent = `${this.roomSettings.gridSize}×${this.roomSettings.gridSize}`;
-        this.saveCachedSettings();
     }
 
     setupCreateRoomButtons() {
@@ -2910,8 +2902,6 @@ class PinsGame {
         
         // Update difficulty color class
         this.updateDifficultyColor(difficultyDisplay);
-        
-        this.saveCachedSettings();
     }
 
     changeComputerGridSize(direction) {
@@ -2925,7 +2915,6 @@ class PinsGame {
         
         this.gridSize = sizes[newIndex];
         document.getElementById('computer-grid-size-display').textContent = `${this.gridSize}×${this.gridSize}`;
-        this.saveCachedSettings();
     }
 
     startComputerGame() {
