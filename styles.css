@@ -1539,19 +1539,39 @@ body.player5-turn .turn-display {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Single Player Button - Cyan theme */
+/* Premium Crown Icon */
+.welcome-option-btn .premium-crown {
+    margin-left: 8px;
+    flex-shrink: 0;
+    width: 12px !important;
+    height: 12px !important;
+    transform: translateY(-2px);
+}
+
+.welcome-option-btn .premium-crown path {
+    fill: #ffd700 !important;
+    stroke: #ffd700 !important;
+    stroke-width: 0.5 !important;
+}
+
+.welcome-option-btn .premium-crown circle {
+    fill: #ffd700 !important;
+    stroke: none !important;
+}
+
+/* Single Player Button - Orange theme */
 #play-computer-btn {
-    background: #06b6d4;
-    border-color: #06b6d4;
+    background: #f97316;
+    border-color: #f97316;
     color: #ffffff;
 }
 
 #play-computer-btn:hover {
-    background: #0891b2;
-    border-color: #0891b2;
+    background: #ea580c;
+    border-color: #ea580c;
     color: #ffffff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.25);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
 }
 
 /* Multiplayer Button - Red theme */
@@ -1569,19 +1589,19 @@ body.player5-turn .turn-display {
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
 }
 
-/* Online Button - Orange theme */
+/* Online Button - Cyan theme */
 #play-online-btn {
-    background: #f97316;
-    border-color: #f97316;
+    background: #06b6d4;
+    border-color: #06b6d4;
     color: #ffffff;
 }
 
 #play-online-btn:hover {
-    background: #ea580c;
-    border-color: #ea580c;
+    background: #0891b2;
+    border-color: #0891b2;
     color: #ffffff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.25);
 }
 
 .welcome-option-btn:active {
@@ -1613,6 +1633,12 @@ body.player5-turn .turn-display {
 #play-online-btn svg path {
     stroke: currentColor !important;
     fill: none !important;
+}
+
+/* Exception for crown - should be filled yellow */
+#play-online-btn svg.premium-crown path {
+    fill: #ffd700 !important;
+    stroke: #ffd700 !important;
 }
 
 /* Circles should be filled white (for heads and wifi dot) */
