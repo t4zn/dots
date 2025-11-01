@@ -1194,6 +1194,11 @@ body.player5-turn .turn-display {
     transform: scale(1.02);
 }
 
+.menu-room-code-btn:active {
+    transform: scale(0.98);
+    background: #1a1f23;
+}
+
 .modal-content {
     padding: 20px 16px 16px;
     border-radius: 20px;
@@ -1279,7 +1284,7 @@ body.player5-turn .turn-display {
     position: fixed;
     top: 20px;
     right: 20px;
-    background: rgba(0, 0, 0, 0.9);
+    background: #10b981;
     color: white;
     padding: 12px 20px;
     border-radius: 8px;
@@ -1291,6 +1296,7 @@ body.player5-turn .turn-display {
     transition: all 0.3s ease;
     max-width: 300px;
     word-wrap: break-word;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .notification.show {
@@ -1891,12 +1897,19 @@ Start Screen */
         display: flex;
         align-items: center;
         gap: 8px;
+        position: relative;
     }
 
     .room-code-btn:hover {
         border-color: #000000;
         background: #000000;
         color: #ffffff;
+        transform: scale(1.02);
+    }
+
+    .room-code-btn:active {
+        transform: scale(0.98);
+        background: #2d3436;
     }
 
     .room-settings {

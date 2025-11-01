@@ -1891,7 +1891,7 @@ class PinsGame {
             roomCodeBtn.replaceWith(roomCodeBtn.cloneNode(true));
             const newRoomCodeBtn = document.getElementById('room-code-btn');
             newRoomCodeBtn.addEventListener('click', () => {
-                document.getElementById('room-code-popup').classList.remove('hidden');
+                this.copyRoomCodeDirectly();
             });
         }
         
@@ -2097,6 +2097,68 @@ class PinsGame {
         }
     }
 
+    copyRoomCodeDirectly() {
+        if (!this.roomCode) return;
+        
+        // Provide immediate visual feedback
+        this.showCopyFeedback();
+        
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(this.roomCode).then(() => {
+                this.showNotification(`Room code ${this.roomCode} copied!`);
+            }).catch(() => {
+                this.fallbackCopyRoomCode();
+            });
+        } else {
+            this.fallbackCopyRoomCode();
+        }
+    }
+
+    showCopyFeedback() {
+        // Briefly change button text to show copy action
+        const roomCodeBtn = document.getElementById('room-code-btn');
+        const menuRoomCodeBtn = document.getElementById('menu-room-code-btn');
+        const roomCodeText = document.getElementById('room-code-text');
+        const menuRoomCodeText = document.getElementById('menu-room-code-text');
+        
+        const originalText = this.roomCode;
+        
+        if (roomCodeText) {
+            roomCodeText.textContent = 'COPIED!';
+            setTimeout(() => {
+                roomCodeText.textContent = originalText;
+            }, 1000);
+        }
+        
+        if (menuRoomCodeText) {
+            menuRoomCodeText.textContent = 'COPIED!';
+            setTimeout(() => {
+                menuRoomCodeText.textContent = originalText;
+            }, 1000);
+        }
+    }
+
+    fallbackCopyRoomCode() {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = this.roomCode;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            this.showNotification(`Room code ${this.roomCode} copied!`);
+        } catch (err) {
+            this.showNotification(`Failed to copy. Room code: ${this.roomCode}`);
+        }
+        
+        document.body.removeChild(textArea);
+    }
+
     setupEventListeners() {
         // Welcome screen buttons
         const playComputerBtn = document.getElementById('play-computer-btn');
@@ -2298,9 +2360,7 @@ class PinsGame {
         const menuRoomCodeBtn = document.getElementById('menu-room-code-btn');
         if (menuRoomCodeBtn) {
             menuRoomCodeBtn.addEventListener('click', () => {
-                document.getElementById('room-code-popup').classList.remove('hidden');
-                // Update the popup with current room code
-                document.getElementById('room-code-large').textContent = this.roomCode;
+                this.copyRoomCodeDirectly();
             });
         }
 
