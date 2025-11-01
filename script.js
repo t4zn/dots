@@ -2937,20 +2937,26 @@ This will give you a native app-like experience!
 
     // Easy: Random moves, sometimes completes boxes
     getEasyMove(availableLines) {
-        // 60% chance to complete a box if available
-        if (Math.random() < 0.6) {
+        // 70% chance to complete a box if available
+        if (Math.random() < 0.7) {
             const completingMove = this.findCompletingMove(availableLines);
             if (completingMove) return completingMove;
         }
         
-        // 50% chance to avoid giving opponent a box
-        if (Math.random() < 0.5) {
+        // 40% chance to avoid giving opponent a box
+        if (Math.random() < 0.4) {
             const safeMove = this.findSafeMove(availableLines);
             if (safeMove) return safeMove;
         }
         
-        // Otherwise random
-        return availableLines[Math.floor(Math.random() * availableLines.length)];
+        // Otherwise random but avoid obviously bad moves
+        const decentMoves = availableLines.filter(line => {
+            const danger = this.calculateDanger(line);
+            return danger < 20; // Avoid moves that give away multiple boxes
+        });
+        
+        const movesToConsider = decentMoves.length > 0 ? decentMoves : availableLines;
+        return movesToConsider[Math.floor(Math.random() * movesToConsider.length)];
     }
 
     // Medium: Completes boxes, tries to avoid giving opponent boxes
@@ -2959,13 +2965,17 @@ This will give you a native app-like experience!
         const completingMove = this.findCompletingMove(availableLines);
         if (completingMove) return completingMove;
         
-        // Look for chain opportunities
-        const chainMove = this.findSimpleChainMove(availableLines);
-        if (chainMove) return chainMove;
+        // Look for moves that set up future box completions
+        const setupMove = this.findBoxSetupMove(availableLines);
+        if (setupMove) return setupMove;
         
         // Try to find safe moves (don't give opponent a box)
         const safeMove = this.findSafeMove(availableLines);
         if (safeMove) return safeMove;
+        
+        // Look for defensive moves that block opponent chains
+        const defensiveMove = this.findDefensiveMove(availableLines);
+        if (defensiveMove) return defensiveMove;
         
         // If no safe move, pick the least dangerous
         return this.findLeastDangerousMove(availableLines);
@@ -2977,19 +2987,23 @@ This will give you a native app-like experience!
         const completingMove = this.findCompletingMove(availableLines);
         if (completingMove) return completingMove;
         
-        // Phase 2: Chain control strategy
-        const chainControlMove = this.findChainControlMove(availableLines);
-        if (chainControlMove) return chainControlMove;
+        // Phase 2: Look for tactical sacrifices - give small chains to get bigger ones
+        const tacticalMove = this.findTacticalSacrifice(availableLines);
+        if (tacticalMove) return tacticalMove;
         
-        // Phase 3: Sacrifice strategy (give opponent small chains to control larger ones)
-        const sacrificeMove = this.findSacrificeMove(availableLines);
-        if (sacrificeMove) return sacrificeMove;
+        // Phase 3: Control the center and create strong positions
+        const positionalMove = this.findPositionalMove(availableLines);
+        if (positionalMove) return positionalMove;
         
-        // Phase 4: Safe moves with parity consideration
-        const parityMove = this.findParityOptimalMove(availableLines);
-        if (parityMove) return parityMove;
+        // Phase 4: Block opponent's potential chains
+        const blockingMove = this.findChainBlockingMove(availableLines);
+        if (blockingMove) return blockingMove;
         
-        return this.findSafeMove(availableLines) || availableLines[0];
+        // Phase 5: Safe moves with strategic value
+        const strategicSafeMove = this.findStrategicSafeMove(availableLines);
+        if (strategicSafeMove) return strategicSafeMove;
+        
+        return this.findLeastDangerousMove(availableLines);
     }
 
     // Expert: Master-level strategy with full game tree analysis
@@ -2998,23 +3012,24 @@ This will give you a native app-like experience!
         const completingMove = this.findCompletingMove(availableLines);
         if (completingMove) return completingMove;
         
-        // Phase 2: Advanced chain manipulation
-        const chainMasterMove = this.findChainMasterMove(availableLines);
-        if (chainMasterMove) return chainMasterMove;
+        // Phase 2: Deep strategic analysis - look ahead multiple moves
+        const deepAnalysisMove = this.findDeepAnalysisMove(availableLines);
+        if (deepAnalysisMove) return deepAnalysisMove;
         
-        // Phase 3: Endgame optimization
-        const endgameMove = this.findEndgameOptimalMove(availableLines);
-        if (endgameMove) return endgameMove;
+        // Phase 3: Advanced chain manipulation and control
+        const masterChainMove = this.findMasterChainMove(availableLines);
+        if (masterChainMove) return masterChainMove;
         
-        // Phase 4: Minimax with alpha-beta pruning
-        const minimaxMove = this.findMinimaxMove(availableLines, 4);
-        if (minimaxMove) return minimaxMove;
+        // Phase 4: Endgame perfect play
+        const perfectMove = this.findPerfectMove(availableLines);
+        if (perfectMove) return perfectMove;
         
-        // Phase 5: Parity and tempo control
-        const tempoMove = this.findTempoControlMove(availableLines);
-        if (tempoMove) return tempoMove;
+        // Phase 5: Positional mastery - control key areas
+        const masterPositionalMove = this.findMasterPositionalMove(availableLines);
+        if (masterPositionalMove) return masterPositionalMove;
         
-        return this.findParityOptimalMove(availableLines) || availableLines[0];
+        // Phase 6: If all else fails, use advanced tactical play
+        return this.findAdvancedTacticalMove(availableLines) || this.findLeastDangerousMove(availableLines);
     }
 
     findCompletingMove(availableLines) {
@@ -3104,18 +3119,21 @@ This will give you a native app-like experience!
     }
 
     findLeastDangerousMove(availableLines) {
-        let leastDangerous = availableLines[0];
+        let leastDangerousMoves = [];
         let minDanger = Infinity;
         
         for (const line of availableLines) {
             const danger = this.calculateDanger(line);
             if (danger < minDanger) {
                 minDanger = danger;
-                leastDangerous = line;
+                leastDangerousMoves = [line];
+            } else if (danger === minDanger) {
+                leastDangerousMoves.push(line);
             }
         }
         
-        return leastDangerous;
+        // Add some randomization to prevent predictable patterns
+        return leastDangerousMoves[Math.floor(Math.random() * leastDangerousMoves.length)];
     }
 
     findChainMove(availableLines) {
@@ -3493,6 +3511,289 @@ This will give you a native app-like experience!
         this.currentPlayer = state.currentPlayer;
     }
 
+    // New strategic functions for improved AI
+    findBoxSetupMove(availableLines) {
+        // Look for moves that set up boxes for completion next turn
+        for (const line of availableLines) {
+            const adjacentBoxes = this.getAdjacentBoxes(line);
+            for (const box of adjacentBoxes) {
+                const linesDrawn = this.countBoxLines(box);
+                if (linesDrawn === 1) {
+                    // This would make a box have 2 lines - good setup
+                    const danger = this.calculateDanger(line);
+                    if (danger < 10) { // Only if not too dangerous
+                        return line;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    findDefensiveMove(availableLines) {
+        // Look for moves that prevent opponent from getting easy boxes
+        const opponentThreats = [];
+        
+        for (const line of availableLines) {
+            const adjacentBoxes = this.getAdjacentBoxes(line);
+            for (const box of adjacentBoxes) {
+                const linesDrawn = this.countBoxLines(box);
+                if (linesDrawn === 2) {
+                    // This box is one move away from completion
+                    opponentThreats.push({ line, box, priority: this.getDefensivePriority(box) });
+                }
+            }
+        }
+        
+        if (opponentThreats.length > 0) {
+            // Sort by priority and return the most important defensive move
+            opponentThreats.sort((a, b) => b.priority - a.priority);
+            return opponentThreats[0].line;
+        }
+        
+        return null;
+    }
+
+    getDefensivePriority(box) {
+        // Higher priority for boxes that would start chains
+        const neighbors = this.getNeighborBoxes(box);
+        let priority = 1;
+        
+        for (const neighbor of neighbors) {
+            const neighborLines = this.countBoxLines(neighbor);
+            if (neighborLines >= 2) {
+                priority += 3; // High priority if it would start a chain
+            } else if (neighborLines === 1) {
+                priority += 1; // Medium priority
+            }
+        }
+        
+        return priority;
+    }
+
+    findTacticalSacrifice(availableLines) {
+        // Advanced: Give opponent a small chain to control a larger one
+        const chains = this.analyzeChainStructure();
+        
+        if (chains.small.length > 0 && chains.large.length > 0) {
+            // If we can sacrifice a 2-box chain to control a 4+ box chain
+            for (const smallChain of chains.small) {
+                if (this.canControlLargerChain(smallChain, chains.large)) {
+                    return this.findChainStartingMove(smallChain, availableLines);
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    analyzeChainStructure() {
+        const allChains = this.identifyPotentialChains();
+        return {
+            small: allChains.filter(chain => chain.length <= 2),
+            medium: allChains.filter(chain => chain.length >= 3 && chain.length <= 4),
+            large: allChains.filter(chain => chain.length >= 5)
+        };
+    }
+
+    identifyPotentialChains() {
+        // More sophisticated chain detection
+        const chains = [];
+        const visited = new Set();
+        
+        for (const box of this.boxes) {
+            if (box.owner === null && !visited.has(`${box.row}-${box.col}`)) {
+                const linesDrawn = this.countBoxLines(box);
+                if (linesDrawn >= 1) { // Include boxes with 1+ lines
+                    const chain = this.exploreChainAdvanced(box, visited);
+                    if (chain.length >= 2) {
+                        chains.push(chain);
+                    }
+                }
+            }
+        }
+        
+        return chains;
+    }
+
+    exploreChainAdvanced(startBox, visited) {
+        const chain = [];
+        const queue = [startBox];
+        
+        while (queue.length > 0) {
+            const box = queue.shift();
+            const key = `${box.row}-${box.col}`;
+            
+            if (visited.has(key) || box.owner !== null) continue;
+            
+            const linesDrawn = this.countBoxLines(box);
+            if (linesDrawn === 0) continue; // Skip empty boxes
+            
+            visited.add(key);
+            chain.push(box);
+            
+            // Add connected boxes
+            const connected = this.getConnectedChainBoxes(box);
+            queue.push(...connected.filter(b => !visited.has(`${b.row}-${b.col}`)));
+        }
+        
+        return chain;
+    }
+
+    getConnectedChainBoxes(box) {
+        const connected = [];
+        const neighbors = this.getNeighborBoxes(box);
+        
+        for (const neighbor of neighbors) {
+            const neighborLines = this.countBoxLines(neighbor);
+            if (neighborLines >= 1) {
+                // Check if they share a drawn line (are actually connected)
+                if (this.boxesShareDrawnLine(box, neighbor)) {
+                    connected.push(neighbor);
+                }
+            }
+        }
+        
+        return connected;
+    }
+
+    boxesShareDrawnLine(box1, box2) {
+        const box1Lines = this.getBoxLines(box1);
+        const box2Lines = this.getBoxLines(box2);
+        
+        for (const line1 of box1Lines) {
+            for (const line2 of box2Lines) {
+                if (line1 === line2 && this.lines.has(line1)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    findPositionalMove(availableLines) {
+        // Control key positions on the board
+        const center = Math.floor(this.gridSize / 2);
+        const keyPositions = [];
+        
+        for (const line of availableLines) {
+            const row = parseInt(line.getAttribute('data-row'));
+            const col = parseInt(line.getAttribute('data-col'));
+            
+            // Score based on position
+            let score = 0;
+            
+            // Center control
+            const distanceFromCenter = Math.abs(row - center) + Math.abs(col - center);
+            score += Math.max(0, 5 - distanceFromCenter);
+            
+            // Edge control (sometimes valuable)
+            if (row === 0 || row === this.gridSize - 1 || col === 0 || col === this.gridSize - 1) {
+                score += 2;
+            }
+            
+            // Corner control
+            if ((row === 0 || row === this.gridSize - 1) && (col === 0 || col === this.gridSize - 1)) {
+                score += 3;
+            }
+            
+            const danger = this.calculateDanger(line);
+            if (danger < 5) { // Only consider if not too dangerous
+                keyPositions.push({ line, score });
+            }
+        }
+        
+        if (keyPositions.length > 0) {
+            keyPositions.sort((a, b) => b.score - a.score);
+            return keyPositions[0].line;
+        }
+        
+        return null;
+    }
+
+    findChainBlockingMove(availableLines) {
+        // Block opponent's potential chains
+        for (const line of availableLines) {
+            const adjacentBoxes = this.getAdjacentBoxes(line);
+            
+            for (const box of adjacentBoxes) {
+                const linesDrawn = this.countBoxLines(box);
+                if (linesDrawn === 1) {
+                    // Check if this box could become part of a dangerous chain
+                    const chainPotential = this.assessChainPotential(box);
+                    if (chainPotential >= 3) {
+                        return line; // Block this potential chain
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    assessChainPotential(box) {
+        let potential = 0;
+        const neighbors = this.getNeighborBoxes(box);
+        
+        for (const neighbor of neighbors) {
+            const neighborLines = this.countBoxLines(neighbor);
+            if (neighborLines >= 1) {
+                potential += neighborLines;
+            }
+        }
+        
+        return potential;
+    }
+
+    findStrategicSafeMove(availableLines) {
+        // Safe moves that also have strategic value
+        const safeMoves = availableLines.filter(line => {
+            const danger = this.calculateDanger(line);
+            return danger === 0;
+        });
+        
+        if (safeMoves.length === 0) return null;
+        
+        // Among safe moves, find those with highest strategic value
+        const scoredMoves = [];
+        
+        for (const move of safeMoves) {
+            let score = 0;
+            
+            // Prefer moves that create future opportunities
+            const adjacentBoxes = this.getAdjacentBoxes(move);
+            for (const box of adjacentBoxes) {
+                const linesDrawn = this.countBoxLines(box);
+                if (linesDrawn === 0) {
+                    score += 2; // Good to start new areas
+                } else if (linesDrawn === 1) {
+                    score += 1; // Decent to build on existing
+                }
+            }
+            
+            // Prefer central moves
+            const row = parseInt(move.getAttribute('data-row'));
+            const col = parseInt(move.getAttribute('data-col'));
+            const center = Math.floor(this.gridSize / 2);
+            const distanceFromCenter = Math.abs(row - center) + Math.abs(col - center);
+            score += Math.max(0, 3 - distanceFromCenter);
+            
+            // Add small random factor to prevent identical play
+            score += Math.random() * 0.5;
+            
+            scoredMoves.push({ move, score });
+        }
+        
+        // Sort by score and pick from top moves
+        scoredMoves.sort((a, b) => b.score - a.score);
+        
+        // Pick from top 3 moves to add variety
+        const topMoves = scoredMoves.slice(0, Math.min(3, scoredMoves.length));
+        const selectedMove = topMoves[Math.floor(Math.random() * topMoves.length)];
+        
+        return selectedMove.move;
+    }
+
     // Placeholder implementations for advanced strategies
     findChainControllingMove(chain, availableLines) {
         // Find move that gives control of the chain
@@ -3546,6 +3847,299 @@ This will give you a native app-like experience!
             const linesDrawn = this.countBoxLines(box);
             return linesDrawn === 2; // Creates a forced move for opponent
         });
+    }
+
+    // Expert-level AI functions
+    findDeepAnalysisMove(availableLines) {
+        // Analyze moves 2-3 steps ahead
+        let bestMove = null;
+        let bestScore = -Infinity;
+        
+        for (const move of availableLines.slice(0, Math.min(10, availableLines.length))) {
+            const score = this.analyzeMoveLookahead(move, 2);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = move;
+            }
+        }
+        
+        return bestMove;
+    }
+
+    analyzeMoveLookahead(move, depth) {
+        if (depth === 0) return this.evaluatePosition();
+        
+        // Simulate this move
+        const originalState = this.captureGameState();
+        const boxesCompleted = this.simulateMoveExecution(move);
+        
+        let score = boxesCompleted * 10; // Base score for boxes gained
+        
+        if (depth > 1) {
+            // Analyze opponent's best response
+            const opponentMoves = this.getAvailableLines();
+            let worstOpponentScore = Infinity;
+            
+            for (const opponentMove of opponentMoves.slice(0, 5)) {
+                const opponentScore = this.analyzeMoveLookahead(opponentMove, depth - 1);
+                worstOpponentScore = Math.min(worstOpponentScore, opponentScore);
+            }
+            
+            score -= worstOpponentScore * 0.8; // Discount opponent's potential
+        }
+        
+        this.restoreGameState(originalState);
+        return score;
+    }
+
+    captureGameState() {
+        return {
+            lines: new Set(this.lines),
+            scores: { ...this.scores },
+            boxes: this.boxes.map(box => ({ ...box, owner: box.owner }))
+        };
+    }
+
+    restoreGameState(state) {
+        this.lines = state.lines;
+        this.scores = state.scores;
+        this.boxes = state.boxes;
+    }
+
+    simulateMoveExecution(move) {
+        const row = parseInt(move.getAttribute('data-row'));
+        const col = parseInt(move.getAttribute('data-col'));
+        const type = move.getAttribute('data-type');
+        const lineId = `${type}-${row}-${col}`;
+        
+        this.lines.add(lineId);
+        
+        // Check for completed boxes
+        let boxesCompleted = 0;
+        const adjacentBoxes = this.getAdjacentBoxes(move);
+        
+        for (const box of adjacentBoxes) {
+            const requiredLines = this.getBoxLines(box);
+            const drawnLines = requiredLines.filter(id => this.lines.has(id));
+            if (drawnLines.length === 4 && box.owner === null) {
+                box.owner = this.currentPlayer;
+                boxesCompleted++;
+                this.scores[`player${this.currentPlayer}`] = (this.scores[`player${this.currentPlayer}`] || 0) + 1;
+            }
+        }
+        
+        return boxesCompleted;
+    }
+
+    findMasterChainMove(availableLines) {
+        // Advanced chain control and manipulation
+        const chains = this.identifyPotentialChains();
+        
+        // Look for moves that create favorable chain structures
+        for (const move of availableLines) {
+            const chainValue = this.evaluateChainMove(move, chains);
+            if (chainValue >= 5) {
+                return move;
+            }
+        }
+        
+        return null;
+    }
+
+    evaluateChainMove(move, chains) {
+        let value = 0;
+        const adjacentBoxes = this.getAdjacentBoxes(move);
+        
+        for (const box of adjacentBoxes) {
+            // Check if this move affects any chains
+            for (const chain of chains) {
+                if (chain.includes(box)) {
+                    const linesDrawn = this.countBoxLines(box);
+                    
+                    if (linesDrawn === 1) {
+                        // This would make the box have 2 lines
+                        if (chain.length >= 4) {
+                            value += 3; // Good to control large chains
+                        } else {
+                            value -= 1; // Avoid creating small chains for opponent
+                        }
+                    } else if (linesDrawn === 2) {
+                        // This would complete the box
+                        value += chain.length; // Value based on chain size
+                    }
+                }
+            }
+        }
+        
+        return value;
+    }
+
+    findPerfectMove(availableLines) {
+        // Perfect endgame play when few moves remain
+        const totalBoxes = (this.gridSize - 1) * (this.gridSize - 1);
+        const completedBoxes = this.boxes.filter(b => b.owner !== null).length;
+        const remainingBoxes = totalBoxes - completedBoxes;
+        
+        if (remainingBoxes <= 8) {
+            // Use deeper analysis for endgame
+            return this.findDeepAnalysisMove(availableLines);
+        }
+        
+        return null;
+    }
+
+    findMasterPositionalMove(availableLines) {
+        // Master-level positional play
+        const positionScores = [];
+        
+        for (const move of availableLines) {
+            let score = 0;
+            const danger = this.calculateDanger(move);
+            
+            if (danger > 5) continue; // Skip dangerous moves
+            
+            // Evaluate position control
+            score += this.evaluatePositionControl(move);
+            
+            // Evaluate future potential
+            score += this.evaluateFuturePotential(move);
+            
+            // Evaluate defensive value
+            score += this.evaluateDefensiveValue(move);
+            
+            positionScores.push({ move, score });
+        }
+        
+        if (positionScores.length > 0) {
+            positionScores.sort((a, b) => b.score - a.score);
+            return positionScores[0].move;
+        }
+        
+        return null;
+    }
+
+    evaluatePositionControl(move) {
+        const row = parseInt(move.getAttribute('data-row'));
+        const col = parseInt(move.getAttribute('data-col'));
+        const center = Math.floor(this.gridSize / 2);
+        
+        let score = 0;
+        
+        // Central control
+        const distanceFromCenter = Math.abs(row - center) + Math.abs(col - center);
+        score += Math.max(0, 4 - distanceFromCenter);
+        
+        // Strategic lines (diagonals, key connections)
+        if (row === col || row + col === this.gridSize - 1) {
+            score += 2;
+        }
+        
+        return score;
+    }
+
+    evaluateFuturePotential(move) {
+        let potential = 0;
+        const adjacentBoxes = this.getAdjacentBoxes(move);
+        
+        for (const box of adjacentBoxes) {
+            const linesDrawn = this.countBoxLines(box);
+            const neighbors = this.getNeighborBoxes(box);
+            
+            // Potential for future chains
+            const neighborActivity = neighbors.reduce((sum, neighbor) => {
+                return sum + this.countBoxLines(neighbor);
+            }, 0);
+            
+            if (linesDrawn === 0 && neighborActivity >= 2) {
+                potential += 2; // Good area to develop
+            } else if (linesDrawn === 1 && neighborActivity >= 3) {
+                potential += 3; // High potential area
+            }
+        }
+        
+        return potential;
+    }
+
+    evaluateDefensiveValue(move) {
+        let defensive = 0;
+        const adjacentBoxes = this.getAdjacentBoxes(move);
+        
+        for (const box of adjacentBoxes) {
+            const linesDrawn = this.countBoxLines(box);
+            
+            if (linesDrawn === 2) {
+                // This prevents opponent from getting a box
+                const chainSize = this.estimateChainSize(box);
+                defensive += chainSize * 2;
+            }
+        }
+        
+        return defensive;
+    }
+
+    estimateChainSize(box) {
+        // Estimate how big a chain starting from this box could be
+        const visited = new Set();
+        return this.exploreChainSize(box, visited, 0);
+    }
+
+    exploreChainSize(box, visited, depth) {
+        if (depth > 6 || visited.has(`${box.row}-${box.col}`) || box.owner !== null) {
+            return 0;
+        }
+        
+        visited.add(`${box.row}-${box.col}`);
+        let size = 1;
+        
+        const neighbors = this.getNeighborBoxes(box);
+        for (const neighbor of neighbors) {
+            const neighborLines = this.countBoxLines(neighbor);
+            if (neighborLines >= 1) {
+                size += this.exploreChainSize(neighbor, visited, depth + 1);
+            }
+        }
+        
+        return Math.min(size, 8); // Cap to prevent infinite recursion
+    }
+
+    findAdvancedTacticalMove(availableLines) {
+        // Advanced tactical considerations
+        for (const move of availableLines) {
+            const tacticalValue = this.evaluateTacticalMove(move);
+            if (tacticalValue >= 4) {
+                return move;
+            }
+        }
+        
+        return null;
+    }
+
+    evaluateTacticalMove(move) {
+        let value = 0;
+        const adjacentBoxes = this.getAdjacentBoxes(move);
+        
+        // Look for tactical patterns
+        for (const box of adjacentBoxes) {
+            const linesDrawn = this.countBoxLines(box);
+            
+            if (linesDrawn === 1) {
+                // Check for double-threat creation
+                const neighbors = this.getNeighborBoxes(box);
+                const threatenedNeighbors = neighbors.filter(n => this.countBoxLines(n) === 2);
+                
+                if (threatenedNeighbors.length >= 2) {
+                    value += 4; // Creates multiple threats
+                }
+            }
+        }
+        
+        return value;
+    }
+
+    canControlLargerChain(smallChain, largeChains) {
+        // Check if sacrificing small chain gives control of larger one
+        // Simplified heuristic
+        return largeChains.length > 0 && smallChain.length <= 2;
     }
 
     returnToWelcome() {
