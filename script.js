@@ -377,7 +377,7 @@ class PinsGame {
         }
     }
 
-    drawLine(lineElement) {
+    async drawLine(lineElement) {
         console.log('DrawLine called for player:', this.currentPlayer, 'botMakingMove:', this.botMakingMove);
         
         if (this.gameOver || lineElement.classList.contains('drawn')) {
@@ -393,8 +393,11 @@ class PinsGame {
         }
 
         // In online mode, check if it's this player's turn
-        if (this.gameMode === 'online' && !this.makeOnlineMove(lineElement)) {
-            return;
+        if (this.gameMode === 'online') {
+            const canMove = await this.makeOnlineMove(lineElement);
+            if (!canMove) {
+                return;
+            }
         }
 
         console.log('Drawing line for player:', this.currentPlayer);
@@ -473,7 +476,7 @@ class PinsGame {
 
         // Sync game state in online mode
         if (this.gameMode === 'online') {
-            this.syncGameState();
+            this.syncGameState().catch(console.error);
         }
 
         // Trigger bot move if it's bot's turn (including extra turns)
@@ -968,8 +971,8 @@ class PinsGame {
         if (this.lobbyInterval) {
             clearInterval(this.lobbyInterval);
         }
-        this.gameInterval = setInterval(() => {
-            this.pollForUpdates();
+        this.gameInterval = setInterval(async () => {
+            await this.pollForUpdates();
         }, 500);
         
         this.showNotification('Joined ongoing game!');
@@ -1483,7 +1486,7 @@ class PinsGame {
         }
     }
 
-    createRoom() {
+    async createRoom() {
         this.roomCode = this.generateRoomCode();
         this.playerId = this.generatePlayerId();
         this.isHost = true;
@@ -1503,7 +1506,7 @@ class PinsGame {
         
         console.log('Room created. Host player ID:', this.playerId, 'isHost:', this.isHost);
         
-        // Store room data in localStorage (simulating server)
+        // Store room data on server
         const roomData = {
             code: this.roomCode,
             host: this.playerId,
@@ -1518,13 +1521,13 @@ class PinsGame {
             created: Date.now()
         };
         
-        localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
+        await this.updateRoomData(roomData);
         
         this.showRoomLobby();
     }
 
-    joinRoom(roomCode) {
-        const roomData = this.getRoomData(roomCode);
+    async joinRoom(roomCode) {
+        const roomData = await this.getRoomData(roomCode);
         
         if (!roomData) {
             alert('Room not found! Please check the room code.');
@@ -1557,8 +1560,8 @@ class PinsGame {
             this.cacheRecentRoomCode(roomCode);
             
             // Immediately check room status
-            setTimeout(() => {
-                this.updateLobbyDisplay();
+            setTimeout(async () => {
+                await this.updateLobbyDisplay();
             }, 100);
             
             return true;
@@ -1589,7 +1592,7 @@ class PinsGame {
         this.roomPlayers = roomData.players;
         
         // Update room data
-        localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
+        await this.updateRoomData(roomData);
         
         // If game already started, join the ongoing game
         if (roomData.gameStarted) {
@@ -1602,36 +1605,110 @@ class PinsGame {
         this.cacheRecentRoomCode(roomCode);
         
         // Immediately check if game should start (for host) or if game already started
-        setTimeout(() => {
-            this.updateLobbyDisplay();
+        setTimeout(async () => {
+            await this.updateLobbyDisplay();
         }, 100);
         
         return true;
     }
 
-    getRoomData(roomCode) {
+    async getRoomData(roomCode) {
+        try {
+            // Use JSONBin for cross-device room sharing
+            const response = await fetch(`https://api.jsonbin.io/v3/b/6740a1e5ad19ca34f8c8f123/latest`, {
+                headers: {
+                    'X-Master-Key': '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.record && data.record.rooms && data.record.rooms[roomCode]) {
+                    return data.record.rooms[roomCode];
+                }
+            }
+        } catch (error) {
+            console.log('Server fetch failed, using localStorage:', error);
+        }
+        
+        // Fallback to localStorage for same-device testing
         const data = localStorage.getItem(`room_${roomCode}`);
         return data ? JSON.parse(data) : null;
     }
 
-    updateRoomData(updates) {
-        const roomData = this.getRoomData(this.roomCode);
-        if (roomData) {
-            Object.assign(roomData, updates);
-            localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
+    async updateRoomData(roomData) {
+        try {
+            // Get current data first
+            const currentResponse = await fetch(`https://api.jsonbin.io/v3/b/6740a1e5ad19ca34f8c8f123/latest`, {
+                headers: {
+                    'X-Master-Key': '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+                }
+            });
+            
+            let allRooms = {};
+            if (currentResponse.ok) {
+                const currentData = await currentResponse.json();
+                allRooms = currentData.record?.rooms || {};
+            }
+            
+            // Update with new room data
+            allRooms[this.roomCode] = roomData;
+            
+            // Update JSONBin with all rooms
+            const response = await fetch(`https://api.jsonbin.io/v3/b/6740a1e5ad19ca34f8c8f123`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+                },
+                body: JSON.stringify({ rooms: allRooms })
+            });
+            
+            if (!response.ok) {
+                throw new Error('JSONBin update failed');
+            }
+        } catch (error) {
+            console.log('Server update failed, using localStorage:', error);
         }
+        
+        // Always update localStorage as backup
+        localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
     }
 
-    leaveRoom() {
+    async leaveRoom() {
         if (!this.roomCode) return;
         
-        const roomData = this.getRoomData(this.roomCode);
+        const roomData = await this.getRoomData(this.roomCode);
         if (roomData) {
             // Remove player from room
             roomData.players = roomData.players.filter(p => p.id !== this.playerId);
             
             if (roomData.players.length === 0) {
-                // Delete empty room
+                // Delete empty room from server
+                try {
+                    const currentResponse = await fetch(`https://api.jsonbin.io/v3/b/6740a1e5ad19ca34f8c8f123/latest`, {
+                        headers: {
+                            'X-Master-Key': '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+                        }
+                    });
+                    
+                    if (currentResponse.ok) {
+                        const currentData = await currentResponse.json();
+                        const allRooms = currentData.record?.rooms || {};
+                        delete allRooms[this.roomCode];
+                        
+                        await fetch(`https://api.jsonbin.io/v3/b/6740a1e5ad19ca34f8c8f123`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Master-Key': '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+                            },
+                            body: JSON.stringify({ rooms: allRooms })
+                        });
+                    }
+                } catch (error) {
+                    console.log('Failed to delete room from server:', error);
+                }
                 localStorage.removeItem(`room_${this.roomCode}`);
             } else {
                 // If host left, make next player host
@@ -1639,7 +1716,7 @@ class PinsGame {
                     roomData.players[0].isHost = true;
                     roomData.host = roomData.players[0].id;
                 }
-                localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
+                await this.updateRoomData(roomData);
             }
         }
         
@@ -1670,10 +1747,10 @@ class PinsGame {
         }
     }
 
-    startOnlineGame() {
+    async startOnlineGame() {
         if (!this.isHost) return;
         
-        const roomData = this.getRoomData(this.roomCode);
+        const roomData = await this.getRoomData(this.roomCode);
         if (!roomData) return;
         
         if (roomData.players.length !== roomData.settings.playerCount) {
@@ -1714,15 +1791,15 @@ class PinsGame {
         if (this.lobbyInterval) {
             clearInterval(this.lobbyInterval);
         }
-        this.gameInterval = setInterval(() => {
-            this.pollForUpdates();
+        this.gameInterval = setInterval(async () => {
+            await this.pollForUpdates();
         }, 500);
     }
 
-    makeOnlineMove(lineElement) {
+    async makeOnlineMove(lineElement) {
         if (!this.isOnlineMode || !this.onlineGameStarted) return false;
         
-        const roomData = this.getRoomData(this.roomCode);
+        const roomData = await this.getRoomData(this.roomCode);
         if (!roomData) return false;
         
         // Check if it's this player's turn
@@ -1735,10 +1812,10 @@ class PinsGame {
         return true;
     }
 
-    syncGameState() {
+    async syncGameState() {
         if (!this.isOnlineMode) return;
         
-        const roomData = this.getRoomData(this.roomCode);
+        const roomData = await this.getRoomData(this.roomCode);
         if (!roomData || !roomData.gameState) return;
         
         // Update game state to server
@@ -1750,13 +1827,13 @@ class PinsGame {
             gameOver: this.gameOver
         };
         
-        this.updateRoomData(roomData);
+        await this.updateRoomData(roomData);
     }
 
-    pollForUpdates() {
+    async pollForUpdates() {
         if (!this.isOnlineMode || !this.onlineGameStarted) return;
         
-        const roomData = this.getRoomData(this.roomCode);
+        const roomData = await this.getRoomData(this.roomCode);
         if (!roomData || !roomData.gameState) return;
         
         // Check for game state changes from other players
@@ -1900,10 +1977,10 @@ class PinsGame {
         if (startButton) {
             startButton.replaceWith(startButton.cloneNode(true));
             const newStartButton = document.getElementById('start-game-manual-btn');
-            newStartButton.addEventListener('click', () => {
+            newStartButton.addEventListener('click', async () => {
                 if (this.isHost) {
                     console.log('Manual start button clicked');
-                    this.startOnlineGame();
+                    await this.startOnlineGame();
                 }
             });
         }
@@ -1911,13 +1988,13 @@ class PinsGame {
         this.updateLobbyDisplay();
         
         // Start polling for room updates (faster polling for better responsiveness)
-        this.lobbyInterval = setInterval(() => {
-            this.updateLobbyDisplay();
+        this.lobbyInterval = setInterval(async () => {
+            await this.updateLobbyDisplay();
         }, 500);
     }
 
-    updateLobbyDisplay() {
-        const roomData = this.getRoomData(this.roomCode);
+    async updateLobbyDisplay() {
+        const roomData = await this.getRoomData(this.roomCode);
         if (!roomData) {
             this.leaveRoom();
             this.returnToWelcome();
@@ -1993,13 +2070,13 @@ class PinsGame {
                 // Auto-start if host and room is full (with shorter delay)
                 if (this.isHost && !roomData.gameStarted && !this.startGameTimeout) {
                     console.log('Host detected, starting game in 1 second...');
-                    this.startGameTimeout = setTimeout(() => {
+                    this.startGameTimeout = setTimeout(async () => {
                         // Double-check room state before starting
-                        const latestRoomData = this.getRoomData(this.roomCode);
+                        const latestRoomData = await this.getRoomData(this.roomCode);
                         if (latestRoomData && !latestRoomData.gameStarted && 
                             latestRoomData.players.length === latestRoomData.settings.playerCount) {
                             console.log('Starting online game now!');
-                            this.startOnlineGame();
+                            await this.startOnlineGame();
                         } else {
                             console.log('Game start cancelled - room state changed');
                         }
@@ -2596,8 +2673,8 @@ class PinsGame {
         
         if (createBtn) {
             createBtn.replaceWith(createBtn.cloneNode(true));
-            document.getElementById('create-room-final-btn').addEventListener('click', () => {
-                this.createRoom();
+            document.getElementById('create-room-final-btn').addEventListener('click', async () => {
+                await this.createRoom();
             });
         }
     }
@@ -2622,12 +2699,12 @@ class PinsGame {
         
         if (joinBtn) {
             joinBtn.replaceWith(joinBtn.cloneNode(true));
-            document.getElementById('join-room-final-btn').addEventListener('click', () => {
+            document.getElementById('join-room-final-btn').addEventListener('click', async () => {
                 const roomCodeInput = document.getElementById('room-code-input');
                 if (roomCodeInput) {
                     const roomCode = roomCodeInput.value.trim();
                     if (roomCode.length === 4) {
-                        this.joinRoom(roomCode);
+                        await this.joinRoom(roomCode);
                     } else {
                         alert('Please enter a 4-letter room code');
                     }
