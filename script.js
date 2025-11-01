@@ -826,7 +826,25 @@ class PinsGame {
                 const myPlayerNumber = this.roomPlayers.find(p => p.id === this.playerId)?.playerNumber;
                 winText.innerHTML = winningPlayer === myPlayerNumber ? 'YOU<br>WIN' : `PLAYER ${winningPlayer}<br>WINS`;
             } else {
-                winText.innerHTML = `PLAYER ${winningPlayer}<br>WINS`;
+                // Use color names for local multiplayer
+                const colorNames = {
+                    2: ['BLUE', 'RED'],
+                    3: ['RED', 'BLUE', 'GREEN'],
+                    4: ['RED', 'BLUE', 'GREEN', 'YELLOW'],
+                    5: ['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE']
+                };
+                
+                // Handle 2-player themes
+                if (this.playerCount === 2) {
+                    if (this.colorTheme === 'green-purple') {
+                        colorNames[2] = ['GREEN', 'PURPLE'];
+                    } else if (this.colorTheme === 'pink-grey') {
+                        colorNames[2] = ['PINK', 'GREY'];
+                    }
+                }
+                
+                const winningColorName = colorNames[this.playerCount][winningPlayer - 1];
+                winText.innerHTML = `${winningColorName}<br>WINS`;
             }
         } else {
             winText.innerHTML = 'DRAW'; // Just "DRAW"
