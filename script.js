@@ -1501,6 +1501,8 @@ class PinsGame {
             tempId: this.generateTempId()
         }];
         
+        console.log('Room created. Host player ID:', this.playerId, 'isHost:', this.isHost);
+        
         // Store room data in localStorage (simulating server)
         const roomData = {
             code: this.roomCode,
@@ -1553,6 +1555,12 @@ class PinsGame {
             }
             
             this.cacheRecentRoomCode(roomCode);
+            
+            // Immediately check room status
+            setTimeout(() => {
+                this.updateLobbyDisplay();
+            }, 100);
+            
             return true;
         }
         
@@ -1592,6 +1600,11 @@ class PinsGame {
         
         // Cache the room code for quick access
         this.cacheRecentRoomCode(roomCode);
+        
+        // Immediately check if game should start (for host) or if game already started
+        setTimeout(() => {
+            this.updateLobbyDisplay();
+        }, 100);
         
         return true;
     }
@@ -1853,6 +1866,7 @@ class PinsGame {
     }
 
     showRoomLobby() {
+        console.log('Showing room lobby. isHost:', this.isHost, 'playerId:', this.playerId);
         document.getElementById('create-room-screen').classList.add('hidden');
         document.getElementById('join-room-screen').classList.add('hidden');
         document.getElementById('room-lobby-screen').classList.remove('hidden');
@@ -1881,12 +1895,25 @@ class PinsGame {
             });
         }
         
+        // Set up manual start button listener
+        const startButton = document.getElementById('start-game-manual-btn');
+        if (startButton) {
+            startButton.replaceWith(startButton.cloneNode(true));
+            const newStartButton = document.getElementById('start-game-manual-btn');
+            newStartButton.addEventListener('click', () => {
+                if (this.isHost) {
+                    console.log('Manual start button clicked');
+                    this.startOnlineGame();
+                }
+            });
+        }
+        
         this.updateLobbyDisplay();
         
-        // Start polling for room updates
+        // Start polling for room updates (faster polling for better responsiveness)
         this.lobbyInterval = setInterval(() => {
             this.updateLobbyDisplay();
-        }, 1000);
+        }, 500);
     }
 
     updateLobbyDisplay() {
@@ -1896,6 +1923,8 @@ class PinsGame {
             this.returnToWelcome();
             return;
         }
+        
+        console.log('Updating lobby display. Players:', roomData.players.length, 'Required:', roomData.settings.playerCount, 'Game started:', roomData.gameStarted, 'Is host:', this.isHost);
         
         // Update room code display
         if (this.roomCode) {
@@ -1945,31 +1974,48 @@ class PinsGame {
         if (roomData.players.length === roomData.settings.playerCount) {
             if (roomData.gameStarted) {
                 statusElement.textContent = 'Game in progress...';
-                // If game already started and we're not in game, join it
+                // If game already started and we're not in game, join it immediately
                 if (!this.onlineGameStarted) {
-                    setTimeout(() => {
-                        this.joinOngoingGame(roomData);
-                    }, 500);
+                    console.log('Game detected as started, joining now...');
+                    this.joinOngoingGame(roomData);
                 }
             } else {
                 statusElement.textContent = this.isHost ? 'Ready to start!' : 'Waiting for host to start...';
                 
-                // Auto-start if host and room is full (with delay to prevent race conditions)
+                // Show manual start button for host
+                const startButton = document.getElementById('start-game-manual-btn');
+                if (this.isHost) {
+                    startButton.style.display = 'inline-flex';
+                } else {
+                    startButton.style.display = 'none';
+                }
+                
+                // Auto-start if host and room is full (with shorter delay)
                 if (this.isHost && !roomData.gameStarted && !this.startGameTimeout) {
+                    console.log('Host detected, starting game in 1 second...');
                     this.startGameTimeout = setTimeout(() => {
                         // Double-check room state before starting
                         const latestRoomData = this.getRoomData(this.roomCode);
                         if (latestRoomData && !latestRoomData.gameStarted && 
                             latestRoomData.players.length === latestRoomData.settings.playerCount) {
+                            console.log('Starting online game now!');
                             this.startOnlineGame();
+                        } else {
+                            console.log('Game start cancelled - room state changed');
                         }
                         this.startGameTimeout = null;
-                    }, 2000);
+                    }, 1000);
                 }
             }
         } else {
             const needed = roomData.settings.playerCount - roomData.players.length;
             statusElement.textContent = `Waiting for ${needed} more player${needed > 1 ? 's' : ''}...`;
+            
+            // Hide start button when room is not full
+            const startButton = document.getElementById('start-game-manual-btn');
+            if (startButton) {
+                startButton.style.display = 'none';
+            }
             
             // Clear any pending start timeout if room is no longer full
             if (this.startGameTimeout) {
