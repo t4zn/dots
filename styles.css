@@ -2036,107 +2036,138 @@ Start Screen */
     /* Settings Button */
     .settings-btn {
         position: absolute;
-        top: 20px;
-        left: 20px;
-        background: none;
+        top: 24px;
+        left: 24px;
+        background: transparent;
         border: none;
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         display: flex !important;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.2s ease;
-        color: #6b7280;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        color: rgba(0, 0, 0, 0.5);
         z-index: 15000;
         pointer-events: auto;
-        padding: 8px;
-        border-radius: 6px;
+        border-radius: 50%;
     }
 
     .settings-btn:hover {
-        background: rgba(255, 255, 255, 0.9);
-        color: #000000;
+        color: rgba(0, 0, 0, 0.8);
         transform: scale(1.1);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .settings-btn:active {
         transform: scale(0.95);
+        transition-duration: 0.1s;
     }
 
     /* Settings Modal */
     .settings-modal-content {
-        max-width: 280px;
-        width: 280px;
-        background: white !important;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        max-width: 380px;
+        width: 380px;
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.12);
         position: relative;
         z-index: 25000;
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        margin: 20px;
     }
 
     #settings-modal {
         z-index: 10000 !important;
+        background: rgba(0, 0, 0, 0.4) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .settings-header {
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
-        margin-bottom: 16px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 28px;
+        padding-bottom: 0;
+        border-bottom: none;
+        position: relative;
     }
 
     .settings-header h3 {
         margin: 0;
-        font-size: 16px;
+        font-size: 20px;
         font-weight: 600;
-        color: #000000;
+        color: rgba(0, 0, 0, 0.9);
+        letter-spacing: -0.2px;
     }
 
     .close-btn {
-        background: none;
+        background: transparent;
         border: none;
-        font-size: 18px;
-        color: #6b7280;
+        font-size: 20px;
+        color: rgba(0, 0, 0, 0.4);
         cursor: pointer;
-        padding: 2px;
+        padding: 4px;
         line-height: 1;
-        transition: color 0.2s ease;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     .close-btn:hover {
-        color: #000000;
+        color: rgba(0, 0, 0, 0.8);
+        transform: translateY(-50%) scale(1.1);
     }
 
     .settings-section {
-        margin-bottom: 16px;
+        margin-bottom: 24px;
     }
 
     .settings-label {
         display: block;
-        font-size: 12px;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.7);
+        margin-bottom: 12px;
+        letter-spacing: 0.2px;
     }
 
     .settings-input {
         width: 100%;
-        padding: 8px 10px;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        font-size: 13px;
-        transition: border-color 0.2s ease;
+        padding: 14px 18px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        font-size: 15px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.6);
+        color: rgba(0, 0, 0, 0.9);
+        font-weight: 400;
     }
 
     .settings-input:focus {
         outline: none;
-        border-color: #000000;
+        border-color: rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.9);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .settings-input::placeholder {
+        color: rgba(0, 0, 0, 0.3);
     }
 
     /* Country Selector */
@@ -2146,29 +2177,35 @@ Start Screen */
 
     .country-btn {
         width: 100%;
-        padding: 8px 10px;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        background: white;
+        padding: 14px 18px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.6);
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 12px;
         cursor: pointer;
-        transition: border-color 0.2s ease;
-        font-size: 13px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 15px;
+        color: rgba(0, 0, 0, 0.9);
+        font-weight: 400;
     }
 
     .country-btn:hover {
-        border-color: #000000;
+        border-color: rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.9);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     }
 
     .flag-emoji {
-        font-size: 14px;
+        font-size: 18px;
     }
 
     .country-btn svg {
         margin-left: auto;
-        transition: transform 0.2s ease;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        color: rgba(0, 0, 0, 0.4);
     }
 
     .country-btn.open svg {
@@ -2180,122 +2217,158 @@ Start Screen */
         top: 100%;
         left: 0;
         right: 0;
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        max-height: 180px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        max-height: 240px;
         z-index: 30000;
-        margin-top: 2px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        margin-top: 8px;
+        box-shadow: 0 16px 64px rgba(0, 0, 0, 0.12);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        overflow: hidden;
     }
 
     .country-search {
         width: 100%;
-        padding: 8px 10px;
+        padding: 16px 20px;
         border: none;
-        border-bottom: 1px solid #e5e7eb;
-        font-size: 12px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        font-size: 14px;
         box-sizing: border-box;
+        background: transparent;
+        color: rgba(0, 0, 0, 0.9);
     }
 
     .country-search:focus {
         outline: none;
-        background: #f9fafb;
+        background: rgba(0, 0, 0, 0.02);
+    }
+
+    .country-search::placeholder {
+        color: rgba(0, 0, 0, 0.3);
     }
 
     .country-list {
-        max-height: 140px;
+        max-height: 180px;
         overflow-y: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .country-list::-webkit-scrollbar {
+        display: none;
     }
 
     .country-option {
-        padding: 6px 10px;
+        padding: 12px 20px;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 12px;
         cursor: pointer;
         transition: background-color 0.2s ease;
-        font-size: 12px;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.8);
     }
 
     .country-option:hover {
-        background: #f3f4f6;
+        background: rgba(0, 0, 0, 0.04);
     }
 
     /* Volume Control */
     .volume-control {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 16px;
     }
 
     .volume-slider {
         flex: 1;
         height: 4px;
         border-radius: 2px;
-        background: #e5e7eb;
+        background: rgba(0, 0, 0, 0.1);
         outline: none;
         -webkit-appearance: none;
         appearance: none;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .volume-slider::-webkit-slider-track {
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(0, 0, 0, 0.1);
     }
 
     .volume-slider::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
         border-radius: 50%;
-        background: #000000;
+        background: rgba(0, 0, 0, 0.7);
         cursor: pointer;
-        transition: transform 0.2s ease;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        border: 2px solid white;
     }
 
     .volume-slider::-webkit-slider-thumb:hover {
         transform: scale(1.2);
+        background: rgba(0, 0, 0, 0.9);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     .volume-slider::-moz-range-thumb {
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
         border-radius: 50%;
-        background: #000000;
+        background: rgba(0, 0, 0, 0.7);
         cursor: pointer;
-        border: none;
+        border: 2px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
 
     .volume-value {
-        font-size: 11px;
-        color: #6b7280;
-        min-width: 30px;
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.6);
+        min-width: 40px;
         text-align: right;
+        font-weight: 500;
     }
 
     /* Settings Footer */
     .settings-footer {
-        margin-top: 16px;
-        padding-top: 12px;
-        border-top: 1px solid #e5e7eb;
+        margin-top: 28px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
         text-align: center;
     }
 
     .privacy-link-btn {
-        background: none;
+        background: transparent;
         border: none;
-        color: #9ca3af;
-        font-size: 11px;
+        color: rgba(0, 0, 0, 0.4);
+        font-size: 12px;
         cursor: pointer;
         padding: 4px 0;
-        transition: color 0.2s ease;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 400;
+        letter-spacing: 0.2px;
+        text-decoration: underline;
+        text-underline-offset: 2px;
     }
 
     .privacy-link-btn:hover {
-        color: #6b7280;
+        color: rgba(0, 0, 0, 0.7);
     }
 
     /* Privacy Modal */
     #privacy-modal {
         z-index: 999999 !important;
-        background: rgba(0, 0, 0, 0.8) !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -2314,49 +2387,54 @@ Start Screen */
     }
 
     .privacy-modal-content {
-        max-width: 320px;
-        width: 320px;
-        background: white !important;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        max-width: 400px;
+        width: 400px;
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.15);
         position: relative;
         z-index: 999999 !important;
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
     }
 
     .privacy-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 16px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 24px;
+        padding-bottom: 0;
+        border-bottom: none;
     }
 
     .privacy-header h3 {
         margin: 0;
-        font-size: 16px;
-        font-weight: 600;
-        color: #000000;
+        font-size: 20px;
+        font-weight: 300;
+        color: rgba(0, 0, 0, 0.9);
+        letter-spacing: -0.2px;
     }
 
     .privacy-content {
-        line-height: 1.5;
-        color: #374151;
-        font-size: 13px;
+        line-height: 1.6;
+        color: rgba(0, 0, 0, 0.7);
+        font-size: 14px;
+        font-weight: 400;
     }
 
     .privacy-content p {
-        margin-bottom: 12px;
+        margin-bottom: 16px;
     }
 
     .privacy-content ul {
-        margin: 12px 0;
-        padding-left: 16px;
+        margin: 16px 0;
+        padding-left: 20px;
     }
 
     .privacy-content li {
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
 
     /* Hide settings button on non-welcome screens */
@@ -2366,34 +2444,85 @@ Start Screen */
 
     @media (max-width: 480px) {
         .settings-btn {
-            top: 15px;
-            left: 15px;
-            width: 28px;
-            height: 28px;
-            padding: 6px;
+            top: 20px;
+            left: 20px;
+            width: 36px;
+            height: 36px;
         }
 
         .settings-btn svg {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
         }
 
         .settings-modal-content {
-            width: 260px;
-            padding: 16px;
+            width: calc(100vw - 40px);
+            max-width: 300px;
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .settings-header {
+            margin-bottom: 16px;
+        }
+
+        .settings-header h3 {
+            font-size: 16px;
+        }
+
+        .settings-section {
+            margin-bottom: 16px;
+        }
+
+        .settings-label {
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .settings-input,
+        .country-btn {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .volume-control {
+            gap: 12px;
+        }
+
+        .settings-footer {
+            margin-top: 16px;
+            padding-top: 16px;
         }
 
         .privacy-modal-content {
-            width: 280px;
-            padding: 16px;
+            width: calc(100vw - 40px);
+            max-width: 300px;
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .privacy-header h3 {
+            font-size: 16px;
         }
 
         .country-dropdown {
-            max-height: 140px;
+            max-height: 180px;
+            border-radius: 12px;
         }
 
         .country-list {
-            max-height: 100px;
+            max-height: 120px;
+        }
+
+        .country-search {
+            padding: 12px 16px;
+            font-size: 13px;
+        }
+
+        .country-option {
+            padding: 8px 16px;
+            font-size: 13px;
         }
     }
 
