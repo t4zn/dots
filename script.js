@@ -2330,13 +2330,7 @@ This will give you a native app-like experience!
             });
         }
 
-        // Download app button
-        const downloadAppBtn = document.getElementById('download-app-btn');
-        if (downloadAppBtn) {
-            downloadAppBtn.addEventListener('click', () => {
-                this.downloadApp();
-            });
-        }
+
 
         // Premium popup close button
         const premiumCloseBtn = document.getElementById('premium-close-btn');
