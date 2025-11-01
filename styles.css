@@ -2387,45 +2387,110 @@ Start Screen */
     }
 
     .privacy-modal-content {
-        max-width: 400px;
-        width: 400px;
+        max-width: 350px;
+        width: 350px;
+        max-height: 65vh;
         background: rgba(255, 255, 255, 0.95) !important;
         border: 1px solid rgba(0, 0, 0, 0.06);
-        border-radius: 24px;
-        padding: 32px;
+        border-radius: 18px;
+        padding: 0;
         box-shadow: 0 32px 80px rgba(0, 0, 0, 0.15);
         position: relative;
         z-index: 999999 !important;
         backdrop-filter: blur(40px);
         -webkit-backdrop-filter: blur(40px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
     .privacy-header {
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
-        margin-bottom: 24px;
-        padding-bottom: 0;
-        border-bottom: none;
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        position: relative;
+        flex-shrink: 0;
     }
 
     .privacy-header h3 {
         margin: 0;
-        font-size: 20px;
-        font-weight: 300;
+        font-size: 18px;
+        font-weight: 600;
         color: rgba(0, 0, 0, 0.9);
         letter-spacing: -0.2px;
     }
 
+    .privacy-header .close-btn {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
     .privacy-content {
         line-height: 1.6;
-        color: rgba(0, 0, 0, 0.7);
+        color: rgba(0, 0, 0, 0.8);
         font-size: 14px;
         font-weight: 400;
+        padding: 18px 22px 22px;
+        overflow-y: auto;
+        flex: 1;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        text-align: left;
+    }
+
+    .privacy-content::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .privacy-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .privacy-content::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+    }
+
+    .privacy-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.3);
     }
 
     .privacy-content p {
-        margin-bottom: 16px;
+        margin-bottom: 12px;
+        text-align: left;
+    }
+
+    .privacy-content h4 {
+        font-size: 15px;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.9);
+        margin: 16px 0 8px 0;
+        letter-spacing: -0.1px;
+        text-align: left;
+    }
+
+    .privacy-content h4:first-child {
+        margin-top: 0;
+    }
+
+    .privacy-content ul {
+        margin: 8px 0 12px 0;
+        padding-left: 18px;
+        text-align: left;
+    }
+
+    .privacy-content li {
+        margin-bottom: 5px;
+        text-align: left;
+    }
+
+    .privacy-content strong {
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.9);
     }
 
     .privacy-content ul {
@@ -2496,14 +2561,52 @@ Start Screen */
         }
 
         .privacy-modal-content {
-            width: calc(100vw - 40px);
-            max-width: 300px;
-            padding: 20px;
-            border-radius: 20px;
+            width: calc(100vw - 32px);
+            max-width: 280px;
+            max-height: 75vh;
+            padding: 0;
+            border-radius: 14px;
+        }
+
+        .privacy-header {
+            padding: 14px 18px 10px;
         }
 
         .privacy-header h3 {
-            font-size: 16px;
+            font-size: 15px;
+        }
+
+        .privacy-header .close-btn {
+            right: 14px;
+        }
+
+        .privacy-content {
+            padding: 14px 18px 18px;
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .privacy-content h4 {
+            font-size: 14px;
+            margin: 12px 0 6px 0;
+            text-align: left;
+        }
+
+        .privacy-content p {
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .privacy-content ul {
+            margin: 6px 0 10px 0;
+            padding-left: 16px;
+            text-align: left;
+        }
+
+        .privacy-content li {
+            margin-bottom: 4px;
+            text-align: left;
         }
 
         .country-dropdown {
