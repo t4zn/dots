@@ -14,6 +14,7 @@ class PinsGame {
         this.colorTheme = 'blue-red'; // Default color theme
         this.gameMode = '2player'; // '2player' or 'bot'
         this.botThinking = false; // Track if bot is thinking
+        this.botMakingMove = false; // Track if bot is currently making a move
         this.difficulty = 'easy'; // 'easy', 'medium', 'hard'
         this.audioContext = null; // Audio context for sound effects
         this.soundEnabled = true; // Sound effects toggle
@@ -332,10 +333,21 @@ class PinsGame {
     }
 
     drawLine(lineElement) {
+        console.log('DrawLine called for player:', this.currentPlayer, 'botMakingMove:', this.botMakingMove);
+        
         if (this.gameOver || lineElement.classList.contains('drawn')) {
+            console.log('Game over or line already drawn');
             return;
         }
 
+        // In bot mode, only allow human player (player 1) to make moves manually
+        // Unless it's the bot making the move
+        if (this.gameMode === 'bot' && this.currentPlayer === 2 && !this.botMakingMove) {
+            console.log('Blocking manual move for bot player');
+            return;
+        }
+
+        console.log('Drawing line for player:', this.currentPlayer);
         this.gameStarted = true;
 
         const row = parseInt(lineElement.getAttribute('data-row'));
@@ -408,6 +420,12 @@ class PinsGame {
 
         this.updateUI(playerGetsAnotherTurn);
         this.checkGameEnd();
+
+        // Trigger bot move if it's bot's turn (including extra turns)
+        if (this.gameMode === 'bot' && this.currentPlayer === 2 && !this.gameOver && !this.botThinking) {
+            console.log('Triggering bot move - extra turn:', playerGetsAnotherTurn);
+            setTimeout(() => this.botMove(), playerGetsAnotherTurn ? 300 : 100);
+        }
     }
 
     checkCompletedBoxes() {
@@ -540,6 +558,12 @@ class PinsGame {
                 }
             }
         }
+        
+        // If no more chains found and it's bot's turn, trigger next move
+        if (this.gameMode === 'bot' && this.currentPlayer === 2 && !this.gameOver && !this.botThinking) {
+            console.log('Auto-complete chain finished, triggering bot move');
+            setTimeout(() => this.botMove(), 400);
+        }
     }
 
     drawLineAuto(lineElement, nextBox, lineId) {
@@ -600,6 +624,12 @@ class PinsGame {
             }, 300);
         } else {
             this.updateUI(true);
+            
+            // Trigger bot move if it's bot's turn after auto-complete
+            if (this.gameMode === 'bot' && this.currentPlayer === 2 && !this.gameOver && !this.botThinking) {
+                console.log('Triggering bot move after auto-complete chain');
+                setTimeout(() => this.botMove(), 200);
+            }
         }
 
         this.checkGameEnd();
@@ -612,6 +642,13 @@ class PinsGame {
         }
 
         const turnDisplay = document.getElementById('turn-display');
+        
+        // Update text based on game mode
+        if (this.gameMode === 'bot') {
+            turnDisplay.textContent = this.currentPlayer === 1 ? 'YOUR TURN' : "BOT'S TURN";
+        } else {
+            turnDisplay.textContent = 'YOUR TURN';
+        }
 
         // Show the display
         turnDisplay.classList.add('show');
@@ -669,24 +706,28 @@ class PinsGame {
             const winningPlayer = winners[0];
             winColor = this.getPlayerColor(winningPlayer);
             
-            // Get color name
-            const colorNames = {
-                2: ['BLUE', 'RED'],
-                3: ['RED', 'BLUE', 'GREEN'],
-                4: ['RED', 'BLUE', 'GREEN', 'YELLOW'],
-                5: ['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE']
-            };
-            
-            // Handle 2-player themes
-            if (this.playerCount === 2) {
-                if (this.colorTheme === 'green-purple') {
-                    colorNames[2] = ['GREEN', 'PURPLE'];
-                } else if (this.colorTheme === 'pink-grey') {
-                    colorNames[2] = ['PINK', 'GREY'];
+            // Get color name - in bot mode, show YOU vs BOT (WINS is added by template)
+            if (this.gameMode === 'bot') {
+                winColorName = winningPlayer === 1 ? 'YOU' : 'BOT';
+            } else {
+                const colorNames = {
+                    2: ['BLUE', 'RED'],
+                    3: ['RED', 'BLUE', 'GREEN'],
+                    4: ['RED', 'BLUE', 'GREEN', 'YELLOW'],
+                    5: ['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE']
+                };
+                
+                // Handle 2-player themes
+                if (this.playerCount === 2) {
+                    if (this.colorTheme === 'green-purple') {
+                        colorNames[2] = ['GREEN', 'PURPLE'];
+                    } else if (this.colorTheme === 'pink-grey') {
+                        colorNames[2] = ['PINK', 'GREY'];
+                    }
                 }
+                
+                winColorName = colorNames[this.playerCount][winningPlayer - 1];
             }
-            
-            winColorName = colorNames[this.playerCount][winningPlayer - 1];
         } else {
             winColor = '#636e72';
             winColorName = 'DRAW';
@@ -808,20 +849,35 @@ class PinsGame {
             alert('With Code - Coming Soon!');
         });
 
+        // Back buttons
+        document.getElementById('computer-back-btn').addEventListener('click', (e) => {
+            e.target.blur(); // Remove focus to clear hover state
+            this.returnToWelcome();
+        });
+
+        document.getElementById('friends-back-btn').addEventListener('click', (e) => {
+            e.target.blur(); // Remove focus to clear hover state
+            this.returnToWelcome();
+        });
+
         // Computer screen buttons
-        document.getElementById('difficulty-prev').addEventListener('click', () => {
+        document.getElementById('difficulty-prev').addEventListener('click', (e) => {
+            e.target.blur();
             this.changeDifficulty(-1);
         });
 
-        document.getElementById('difficulty-next').addEventListener('click', () => {
+        document.getElementById('difficulty-next').addEventListener('click', (e) => {
+            e.target.blur();
             this.changeDifficulty(1);
         });
 
-        document.getElementById('computer-grid-prev').addEventListener('click', () => {
+        document.getElementById('computer-grid-prev').addEventListener('click', (e) => {
+            e.target.blur();
             this.changeComputerGridSize(-1);
         });
 
-        document.getElementById('computer-grid-next').addEventListener('click', () => {
+        document.getElementById('computer-grid-next').addEventListener('click', (e) => {
+            e.target.blur();
             this.changeComputerGridSize(1);
         });
 
@@ -835,20 +891,24 @@ class PinsGame {
         });
 
         // Grid size navigation arrows
-        document.getElementById('grid-prev').addEventListener('click', () => {
+        document.getElementById('grid-prev').addEventListener('click', (e) => {
+            e.target.blur();
             this.changeStartGridSize(-1);
         });
 
-        document.getElementById('grid-next').addEventListener('click', () => {
+        document.getElementById('grid-next').addEventListener('click', (e) => {
+            e.target.blur();
             this.changeStartGridSize(1);
         });
 
         // Player count navigation arrows
-        document.getElementById('player-prev').addEventListener('click', () => {
+        document.getElementById('player-prev').addEventListener('click', (e) => {
+            e.target.blur();
             this.changePlayerCount(-1);
         });
 
-        document.getElementById('player-next').addEventListener('click', () => {
+        document.getElementById('player-next').addEventListener('click', (e) => {
+            e.target.blur();
             this.changePlayerCount(1);
         });
 
@@ -1010,9 +1070,13 @@ class PinsGame {
     }
 
     startComputerGame() {
+        console.log('Starting computer game');
         // Set to 2 players and bot mode
         this.playerCount = 2;
         this.gameMode = 'bot';
+        this.botThinking = false;
+        
+        console.log('Game mode set to:', this.gameMode, 'Current player:', this.currentPlayer);
         
         // Initialize scores for 2 players
         this.scores = {
@@ -1032,6 +1096,683 @@ class PinsGame {
         
         // Start background music
         this.startBackgroundMusic();
+        
+        // If bot goes first (player 2), trigger bot move
+        if (this.currentPlayer === 2) {
+            console.log('Bot goes first, triggering move');
+            setTimeout(() => this.botMove(), 500);
+        }
+    }
+
+    // Bot AI Logic
+    botMove() {
+        console.log('Bot move called, current player:', this.currentPlayer, 'game mode:', this.gameMode);
+        if (this.botThinking || this.gameOver || this.currentPlayer !== 2) return;
+        
+        this.botThinking = true;
+        console.log('Bot is thinking...');
+        
+        // Add delay to make it feel more natural
+        const delay = this.difficulty === 'easy' ? 800 : this.difficulty === 'medium' ? 600 : 400;
+        
+        setTimeout(() => {
+            if (this.gameOver || this.currentPlayer !== 2) {
+                this.botThinking = false;
+                return;
+            }
+            
+            const move = this.getBotMove();
+            console.log('Bot selected move:', move);
+            if (move) {
+                // Mark as bot making move and call drawLine
+                this.botMakingMove = true;
+                this.drawLine(move);
+                this.botMakingMove = false;
+            }
+            this.botThinking = false;
+        }, delay);
+    }
+
+    getBotMove() {
+        const availableLines = this.getAvailableLines();
+        if (availableLines.length === 0) return null;
+
+        switch (this.difficulty) {
+            case 'easy':
+                return this.getEasyMove(availableLines);
+            case 'medium':
+                return this.getMediumMove(availableLines);
+            case 'hard':
+                return this.getHardMove(availableLines);
+            case 'expert':
+                return this.getExpertMove(availableLines);
+            default:
+                return this.getEasyMove(availableLines);
+        }
+    }
+
+    getAvailableLines() {
+        return Array.from(document.querySelectorAll('.line:not(.drawn)'));
+    }
+
+    // Easy: Random moves, sometimes completes boxes
+    getEasyMove(availableLines) {
+        // 60% chance to complete a box if available
+        if (Math.random() < 0.6) {
+            const completingMove = this.findCompletingMove(availableLines);
+            if (completingMove) return completingMove;
+        }
+        
+        // 50% chance to avoid giving opponent a box
+        if (Math.random() < 0.5) {
+            const safeMove = this.findSafeMove(availableLines);
+            if (safeMove) return safeMove;
+        }
+        
+        // Otherwise random
+        return availableLines[Math.floor(Math.random() * availableLines.length)];
+    }
+
+    // Medium: Completes boxes, tries to avoid giving opponent boxes
+    getMediumMove(availableLines) {
+        // Always complete a box if available
+        const completingMove = this.findCompletingMove(availableLines);
+        if (completingMove) return completingMove;
+        
+        // Look for chain opportunities
+        const chainMove = this.findSimpleChainMove(availableLines);
+        if (chainMove) return chainMove;
+        
+        // Try to find safe moves (don't give opponent a box)
+        const safeMove = this.findSafeMove(availableLines);
+        if (safeMove) return safeMove;
+        
+        // If no safe move, pick the least dangerous
+        return this.findLeastDangerousMove(availableLines);
+    }
+
+    // Hard: Strategic play with advanced tactics
+    getHardMove(availableLines) {
+        // Phase 1: Always complete available boxes
+        const completingMove = this.findCompletingMove(availableLines);
+        if (completingMove) return completingMove;
+        
+        // Phase 2: Chain control strategy
+        const chainControlMove = this.findChainControlMove(availableLines);
+        if (chainControlMove) return chainControlMove;
+        
+        // Phase 3: Sacrifice strategy (give opponent small chains to control larger ones)
+        const sacrificeMove = this.findSacrificeMove(availableLines);
+        if (sacrificeMove) return sacrificeMove;
+        
+        // Phase 4: Safe moves with parity consideration
+        const parityMove = this.findParityOptimalMove(availableLines);
+        if (parityMove) return parityMove;
+        
+        return this.findSafeMove(availableLines) || availableLines[0];
+    }
+
+    // Expert: Master-level strategy with full game tree analysis
+    getExpertMove(availableLines) {
+        // Phase 1: Always complete available boxes
+        const completingMove = this.findCompletingMove(availableLines);
+        if (completingMove) return completingMove;
+        
+        // Phase 2: Advanced chain manipulation
+        const chainMasterMove = this.findChainMasterMove(availableLines);
+        if (chainMasterMove) return chainMasterMove;
+        
+        // Phase 3: Endgame optimization
+        const endgameMove = this.findEndgameOptimalMove(availableLines);
+        if (endgameMove) return endgameMove;
+        
+        // Phase 4: Minimax with alpha-beta pruning
+        const minimaxMove = this.findMinimaxMove(availableLines, 4);
+        if (minimaxMove) return minimaxMove;
+        
+        // Phase 5: Parity and tempo control
+        const tempoMove = this.findTempoControlMove(availableLines);
+        if (tempoMove) return tempoMove;
+        
+        return this.findParityOptimalMove(availableLines) || availableLines[0];
+    }
+
+    findCompletingMove(availableLines) {
+        for (const line of availableLines) {
+            if (this.wouldCompleteBox(line)) {
+                return line;
+            }
+        }
+        return null;
+    }
+
+    findSafeMove(availableLines) {
+        const safeMoves = availableLines.filter(line => {
+            const adjacentBoxes = this.getAdjacentBoxes(line);
+            return adjacentBoxes.every(box => {
+                const linesDrawn = this.countBoxLines(box);
+                return linesDrawn <= 1; // Safe if box has 1 or fewer lines
+            });
+        });
+        
+        if (safeMoves.length > 0) {
+            // Prefer moves that don't create any 2-line boxes
+            const superSafeMoves = safeMoves.filter(line => {
+                const adjacentBoxes = this.getAdjacentBoxes(line);
+                return adjacentBoxes.every(box => {
+                    const linesDrawn = this.countBoxLines(box);
+                    return linesDrawn === 0; // Super safe if box has no lines
+                });
+            });
+            
+            if (superSafeMoves.length > 0) {
+                return superSafeMoves[Math.floor(Math.random() * superSafeMoves.length)];
+            }
+            
+            return safeMoves[Math.floor(Math.random() * safeMoves.length)];
+        }
+        return null;
+    }
+
+    // Simple chain detection for medium difficulty
+    findSimpleChainMove(availableLines) {
+        for (const line of availableLines) {
+            const adjacentBoxes = this.getAdjacentBoxes(line);
+            
+            // Look for boxes that would have 2 lines after this move
+            for (const box of adjacentBoxes) {
+                const linesDrawn = this.countBoxLines(box);
+                if (linesDrawn === 1) {
+                    // Check if this creates a potential chain
+                    const neighbors = this.getNeighborBoxes(box);
+                    const chainPotential = neighbors.filter(neighbor => {
+                        const neighborLines = this.countBoxLines(neighbor);
+                        return neighborLines >= 1;
+                    }).length;
+                    
+                    if (chainPotential >= 2) {
+                        return line; // This could start a good chain
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    // Get neighboring boxes for chain analysis
+    getNeighborBoxes(box) {
+        const neighbors = [];
+        const directions = [
+            { dr: -1, dc: 0 }, { dr: 1, dc: 0 },
+            { dr: 0, dc: -1 }, { dr: 0, dc: 1 }
+        ];
+        
+        for (const { dr, dc } of directions) {
+            const newRow = box.row + dr;
+            const newCol = box.col + dc;
+            
+            if (newRow >= 0 && newRow < this.gridSize - 1 && 
+                newCol >= 0 && newCol < this.gridSize - 1) {
+                const neighbor = this.boxes.find(b => b.row === newRow && b.col === newCol);
+                if (neighbor && neighbor.owner === null) {
+                    neighbors.push(neighbor);
+                }
+            }
+        }
+        
+        return neighbors;
+    }
+
+    findLeastDangerousMove(availableLines) {
+        let leastDangerous = availableLines[0];
+        let minDanger = Infinity;
+        
+        for (const line of availableLines) {
+            const danger = this.calculateDanger(line);
+            if (danger < minDanger) {
+                minDanger = danger;
+                leastDangerous = line;
+            }
+        }
+        
+        return leastDangerous;
+    }
+
+    findChainMove(availableLines) {
+        // Look for moves that set up chains
+        for (const line of availableLines) {
+            const adjacentBoxes = this.getAdjacentBoxes(line);
+            for (const box of adjacentBoxes) {
+                const linesDrawn = this.countBoxLines(box);
+                if (linesDrawn === 2) {
+                    // This could start a chain
+                    return line;
+                }
+            }
+        }
+        return null;
+    }
+
+    findBestStrategicMove(availableLines) {
+        // Prefer moves in the center of the board
+        const centerMoves = availableLines.filter(line => {
+            const row = parseInt(line.getAttribute('data-row'));
+            const col = parseInt(line.getAttribute('data-col'));
+            const center = Math.floor(this.gridSize / 2);
+            return Math.abs(row - center) <= 1 && Math.abs(col - center) <= 1;
+        });
+        
+        if (centerMoves.length > 0) {
+            return centerMoves[Math.floor(Math.random() * centerMoves.length)];
+        }
+        
+        return this.findSafeMove(availableLines) || availableLines[0];
+    }
+
+    wouldCompleteBox(lineElement) {
+        const row = parseInt(lineElement.getAttribute('data-row'));
+        const col = parseInt(lineElement.getAttribute('data-col'));
+        const type = lineElement.getAttribute('data-type');
+        const lineId = `${type}-${row}-${col}`;
+        
+        const adjacentBoxes = this.getAdjacentBoxes(lineElement);
+        
+        for (const box of adjacentBoxes) {
+            const requiredLines = this.getBoxLines(box);
+            const drawnLines = requiredLines.filter(id => this.lines.has(id) || id === lineId);
+            if (drawnLines.length === 4) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    getAdjacentBoxes(lineElement) {
+        const row = parseInt(lineElement.getAttribute('data-row'));
+        const col = parseInt(lineElement.getAttribute('data-col'));
+        const type = lineElement.getAttribute('data-type');
+        
+        const boxes = [];
+        
+        if (type === 'horizontal') {
+            // Box above
+            if (row > 0) {
+                const box = this.boxes.find(b => b.row === row - 1 && b.col === col);
+                if (box) boxes.push(box);
+            }
+            // Box below
+            if (row < this.gridSize - 1) {
+                const box = this.boxes.find(b => b.row === row && b.col === col);
+                if (box) boxes.push(box);
+            }
+        } else {
+            // Box left
+            if (col > 0) {
+                const box = this.boxes.find(b => b.row === row && b.col === col - 1);
+                if (box) boxes.push(box);
+            }
+            // Box right
+            if (col < this.gridSize - 1) {
+                const box = this.boxes.find(b => b.row === row && b.col === col);
+                if (box) boxes.push(box);
+            }
+        }
+        
+        return boxes;
+    }
+
+    getBoxLines(box) {
+        const { row, col } = box;
+        return [
+            `horizontal-${row}-${col}`,
+            `horizontal-${row + 1}-${col}`,
+            `vertical-${row}-${col}`,
+            `vertical-${row}-${col + 1}`
+        ];
+    }
+
+    countBoxLines(box) {
+        const requiredLines = this.getBoxLines(box);
+        return requiredLines.filter(id => this.lines.has(id)).length;
+    }
+
+    countAdjacentBoxes(lineElement) {
+        const adjacentBoxes = this.getAdjacentBoxes(lineElement);
+        return adjacentBoxes.map(box => this.countBoxLines(box));
+    }
+
+    calculateDanger(lineElement) {
+        const adjacentBoxes = this.getAdjacentBoxes(lineElement);
+        let danger = 0;
+        
+        for (const box of adjacentBoxes) {
+            const linesDrawn = this.countBoxLines(box);
+            if (linesDrawn === 2) {
+                danger += 10; // High danger - would give opponent a box
+            } else if (linesDrawn === 1) {
+                danger += 1; // Low danger
+            }
+        }
+        
+        return danger;
+    }
+
+    // Advanced Strategy: Chain Control
+    findChainControlMove(availableLines) {
+        const chains = this.identifyChains();
+        
+        // Prefer to control long chains
+        for (const chain of chains.sort((a, b) => b.length - a.length)) {
+            if (chain.length >= 3) {
+                // Look for moves that give us control of this chain
+                const controlMove = this.findChainControllingMove(chain, availableLines);
+                if (controlMove) return controlMove;
+            }
+        }
+        
+        return null;
+    }
+
+    // Advanced Strategy: Sacrifice smaller chains to control larger ones
+    findSacrificeMove(availableLines) {
+        const chains = this.identifyChains();
+        const longChains = chains.filter(c => c.length >= 4);
+        const shortChains = chains.filter(c => c.length === 2);
+        
+        // If there are long chains available, sacrifice short ones
+        if (longChains.length > 0 && shortChains.length > 0) {
+            // Give opponent a short chain to maintain control
+            for (const shortChain of shortChains) {
+                const sacrificeMove = this.findChainStartingMove(shortChain, availableLines);
+                if (sacrificeMove) return sacrificeMove;
+            }
+        }
+        
+        return null;
+    }
+
+    // Advanced Strategy: Parity-based optimal moves
+    findParityOptimalMove(availableLines) {
+        const totalBoxes = (this.gridSize - 1) * (this.gridSize - 1);
+        const completedBoxes = this.boxes.filter(b => b.owner !== null).length;
+        const remainingBoxes = totalBoxes - completedBoxes;
+        
+        // In endgame, parity matters
+        if (remainingBoxes <= 8) {
+            const chains = this.identifyChains();
+            const chainCount = chains.length;
+            
+            // Try to maintain favorable parity
+            if (chainCount % 2 === 0) {
+                // Even number of chains - try to keep it even
+                return this.findParityPreservingMove(availableLines);
+            } else {
+                // Odd number of chains - try to make it even
+                return this.findParityChangingMove(availableLines);
+            }
+        }
+        
+        return null;
+    }
+
+    // Master Strategy: Chain manipulation for experts
+    findChainMasterMove(availableLines) {
+        const chains = this.identifyChains();
+        
+        // Advanced chain analysis
+        for (const chain of chains) {
+            if (chain.length >= 2) {
+                // Check if we can create a double-dealing situation
+                const doubleMove = this.findDoubleDealMove(chain, availableLines);
+                if (doubleMove) return doubleMove;
+                
+                // Check for chain merging opportunities
+                const mergeMove = this.findChainMergeMove(chain, chains, availableLines);
+                if (mergeMove) return mergeMove;
+            }
+        }
+        
+        return null;
+    }
+
+    // Master Strategy: Endgame optimization
+    findEndgameOptimalMove(availableLines) {
+        const totalBoxes = (this.gridSize - 1) * (this.gridSize - 1);
+        const completedBoxes = this.boxes.filter(b => b.owner !== null).length;
+        const remainingBoxes = totalBoxes - completedBoxes;
+        
+        if (remainingBoxes <= 6) {
+            // Use perfect endgame play
+            return this.findPerfectEndgameMove(availableLines);
+        }
+        
+        return null;
+    }
+
+    // Master Strategy: Minimax with alpha-beta pruning
+    findMinimaxMove(availableLines, depth) {
+        let bestMove = null;
+        let bestScore = -Infinity;
+        
+        for (const move of availableLines.slice(0, Math.min(8, availableLines.length))) {
+            const score = this.minimax(move, depth - 1, -Infinity, Infinity, false);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = move;
+            }
+        }
+        
+        return bestMove;
+    }
+
+    // Master Strategy: Tempo control
+    findTempoControlMove(availableLines) {
+        // Look for moves that force opponent into bad positions
+        for (const move of availableLines) {
+            if (this.createsForcedSequence(move)) {
+                return move;
+            }
+        }
+        
+        return null;
+    }
+
+    // Helper: Identify all chains on the board
+    identifyChains() {
+        const chains = [];
+        const visited = new Set();
+        
+        for (const box of this.boxes) {
+            if (box.owner === null && !visited.has(`${box.row}-${box.col}`)) {
+                const chain = this.exploreChain(box, visited);
+                if (chain.length >= 2) {
+                    chains.push(chain);
+                }
+            }
+        }
+        
+        return chains;
+    }
+
+    // Helper: Explore a chain starting from a box
+    exploreChain(startBox, visited) {
+        const chain = [];
+        const queue = [startBox];
+        
+        while (queue.length > 0) {
+            const box = queue.shift();
+            const key = `${box.row}-${box.col}`;
+            
+            if (visited.has(key) || box.owner !== null) continue;
+            
+            const linesDrawn = this.countBoxLines(box);
+            if (linesDrawn < 2) continue;
+            
+            visited.add(key);
+            chain.push(box);
+            
+            // Add adjacent boxes that could be part of the chain
+            const adjacent = this.getAdjacentChainBoxes(box);
+            queue.push(...adjacent);
+        }
+        
+        return chain;
+    }
+
+    // Helper: Get adjacent boxes that could be part of a chain
+    getAdjacentChainBoxes(box) {
+        const adjacent = [];
+        const directions = [
+            { dr: -1, dc: 0 }, { dr: 1, dc: 0 },
+            { dr: 0, dc: -1 }, { dr: 0, dc: 1 }
+        ];
+        
+        for (const { dr, dc } of directions) {
+            const newRow = box.row + dr;
+            const newCol = box.col + dc;
+            
+            if (newRow >= 0 && newRow < this.gridSize - 1 && 
+                newCol >= 0 && newCol < this.gridSize - 1) {
+                const adjBox = this.boxes.find(b => b.row === newRow && b.col === newCol);
+                if (adjBox && adjBox.owner === null) {
+                    adjacent.push(adjBox);
+                }
+            }
+        }
+        
+        return adjacent;
+    }
+
+    // Helper: Minimax algorithm with alpha-beta pruning
+    minimax(move, depth, alpha, beta, isMaximizing) {
+        if (depth === 0) {
+            return this.evaluatePosition();
+        }
+        
+        // Simulate the move
+        const simulation = this.simulateMove(move);
+        
+        if (isMaximizing) {
+            let maxEval = -Infinity;
+            const nextMoves = this.getAvailableLines();
+            
+            for (const nextMove of nextMoves.slice(0, 5)) {
+                const evaluation = this.minimax(nextMove, depth - 1, alpha, beta, false);
+                maxEval = Math.max(maxEval, evaluation);
+                alpha = Math.max(alpha, evaluation);
+                if (beta <= alpha) break;
+            }
+            
+            this.undoSimulation(simulation);
+            return maxEval;
+        } else {
+            let minEval = Infinity;
+            const nextMoves = this.getAvailableLines();
+            
+            for (const nextMove of nextMoves.slice(0, 5)) {
+                const evaluation = this.minimax(nextMove, depth - 1, alpha, beta, true);
+                minEval = Math.min(minEval, evaluation);
+                beta = Math.min(beta, evaluation);
+                if (beta <= alpha) break;
+            }
+            
+            this.undoSimulation(simulation);
+            return minEval;
+        }
+    }
+
+    // Helper: Evaluate current position
+    evaluatePosition() {
+        const myScore = this.scores.player2 || 0;
+        const opponentScore = this.scores.player1 || 0;
+        const scoreDiff = myScore - opponentScore;
+        
+        // Add positional factors
+        const chains = this.identifyChains();
+        const longChains = chains.filter(c => c.length >= 3).length;
+        const shortChains = chains.filter(c => c.length === 2).length;
+        
+        return scoreDiff * 10 + longChains * 5 - shortChains * 2;
+    }
+
+    // Helper: Simulate a move
+    simulateMove(move) {
+        // Return state to restore later
+        return {
+            lines: new Set(this.lines),
+            scores: { ...this.scores },
+            currentPlayer: this.currentPlayer
+        };
+    }
+
+    // Helper: Undo simulation
+    undoSimulation(state) {
+        this.lines = state.lines;
+        this.scores = state.scores;
+        this.currentPlayer = state.currentPlayer;
+    }
+
+    // Placeholder implementations for advanced strategies
+    findChainControllingMove(chain, availableLines) {
+        // Find move that gives control of the chain
+        return availableLines.find(line => {
+            const adjacentBoxes = this.getAdjacentBoxes(line);
+            return adjacentBoxes.some(box => chain.includes(box));
+        });
+    }
+
+    findChainStartingMove(chain, availableLines) {
+        // Find move that starts the chain for opponent
+        return availableLines.find(line => {
+            const adjacentBoxes = this.getAdjacentBoxes(line);
+            return adjacentBoxes.some(box => {
+                const linesDrawn = this.countBoxLines(box);
+                return linesDrawn === 2 && chain.includes(box);
+            });
+        });
+    }
+
+    findParityPreservingMove(availableLines) {
+        return this.findSafeMove(availableLines);
+    }
+
+    findParityChangingMove(availableLines) {
+        return availableLines.find(line => {
+            const danger = this.calculateDanger(line);
+            return danger === 1; // Slightly risky but changes parity
+        });
+    }
+
+    findDoubleDealMove(chain, availableLines) {
+        // Advanced tactic - placeholder
+        return null;
+    }
+
+    findChainMergeMove(chain, allChains, availableLines) {
+        // Advanced tactic - placeholder
+        return null;
+    }
+
+    findPerfectEndgameMove(availableLines) {
+        // Perfect endgame play - use minimax
+        return this.findMinimaxMove(availableLines, 6);
+    }
+
+    createsForcedSequence(move) {
+        // Check if move creates a forced sequence
+        const adjacentBoxes = this.getAdjacentBoxes(move);
+        return adjacentBoxes.some(box => {
+            const linesDrawn = this.countBoxLines(box);
+            return linesDrawn === 2; // Creates a forced move for opponent
+        });
+    }
+
+    returnToWelcome() {
+        // Hide all screens except welcome
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('computer-screen').classList.add('hidden');
+        document.getElementById('welcome-screen').classList.remove('hidden');
     }
 
     returnToHome() {

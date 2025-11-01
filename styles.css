@@ -1633,7 +1633,58 @@ Start Screen */
     letter-spacing: 0.3px;
 }
 
+/* Back Button */
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: transparent;
+    border: 1px solid #d1d5db;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: #6b7280;
+}
+
+.back-btn:hover {
+    border-color: #000000;
+    background: #000000;
+    color: #ffffff;
+    transform: scale(1.05);
+}
+
+.back-btn:active {
+    transform: scale(0.95);
+}
+
+.back-btn:focus {
+    outline: none;
+}
+
+.back-btn:focus:not(:hover) {
+    border-color: #d1d5db;
+    background: transparent;
+    color: #6b7280;
+}
+
 @media (max-width: 480px) {
+    .back-btn {
+        top: 15px;
+        left: 15px;
+        width: 32px;
+        height: 32px;
+    }
+    
+    .back-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
     .start-content {
         padding: 40px 30px;
         min-height: 85vh;
