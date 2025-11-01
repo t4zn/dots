@@ -1058,6 +1058,14 @@ class PinsGame {
         }
     }
 
+    updateDifficultyColor(difficultyDisplay) {
+        // Remove all difficulty color classes
+        difficultyDisplay.classList.remove('difficulty-easy', 'difficulty-medium', 'difficulty-hard', 'difficulty-expert');
+        
+        // Add the appropriate color class based on current difficulty
+        difficultyDisplay.classList.add(`difficulty-${this.difficulty}`);
+    }
+
     updateUIWithCachedSettings() {
         // Update main game settings displays
         const gridDisplay = document.getElementById('grid-size-display');
@@ -1080,6 +1088,9 @@ class PinsGame {
             const difficulties = ['Easy', 'Medium', 'Hard', 'Expert'];
             const difficultyIndex = ['easy', 'medium', 'hard', 'expert'].indexOf(this.difficulty);
             difficultyDisplay.textContent = difficulties[difficultyIndex] || 'Easy';
+            
+            // Update difficulty color class
+            this.updateDifficultyColor(difficultyDisplay);
         }
         
         // Update room settings displays
@@ -2831,7 +2842,12 @@ This will give you a native app-like experience!
         if (newIndex >= difficulties.length) newIndex = 0;
         
         this.difficulty = difficulties[newIndex].toLowerCase();
-        document.getElementById('difficulty-display').textContent = difficulties[newIndex];
+        const difficultyDisplay = document.getElementById('difficulty-display');
+        difficultyDisplay.textContent = difficulties[newIndex];
+        
+        // Update difficulty color class
+        this.updateDifficultyColor(difficultyDisplay);
+        
         this.saveCachedSettings();
     }
 

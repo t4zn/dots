@@ -4,6 +4,13 @@
     box-sizing: border-box;
 }
 
+/* Prevent zooming and text selection */
+html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    touch-action: manipulation;
+}
+
 .hidden {
     display: none !important;
 }
@@ -16,6 +23,12 @@ body {
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body::before {
@@ -1805,6 +1818,23 @@ Start Screen */
     min-width: 150px;
     text-align: center;
     letter-spacing: -2px;
+}
+
+/* Difficulty level colors */
+#difficulty-display.difficulty-easy {
+    color: #10b981 !important; /* Green */
+}
+
+#difficulty-display.difficulty-medium {
+    color: #f97316 !important; /* Orange */
+}
+
+#difficulty-display.difficulty-hard {
+    color: #ef4444 !important; /* Red */
+}
+
+#difficulty-display.difficulty-expert {
+    color: #7c2d12 !important; /* Maroon */
 }
 
 .start-btn {
