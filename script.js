@@ -33,6 +33,11 @@ class PinsGame {
         this.gameState = null;
         this.onlineGameStarted = false;
         
+        // Settings properties
+        this.playerName = 'Player';
+        this.selectedCountry = { code: 'US', name: 'United States', flag: '🇺🇸' };
+        this.volume = 100;
+        
         // Initialize scores for default player count
         for (let i = 1; i <= this.playerCount; i++) {
             this.scores[`player${i}`] = 0;
@@ -56,7 +61,19 @@ class PinsGame {
         // Update UI after DOM is ready
         setTimeout(() => {
             this.updateUIWithCachedSettings();
-        }, 0);
+            
+            // Additional settings button setup as fallback
+            const settingsBtn = document.getElementById('settings-btn');
+            if (settingsBtn && !settingsBtn.hasAttribute('data-listener-added')) {
+                settingsBtn.setAttribute('data-listener-added', 'true');
+                settingsBtn.onclick = (e) => {
+                    console.log('Settings button clicked via onclick');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.showSettings();
+                };
+            }
+        }, 100);
     }
 
     initAudio() {
@@ -83,8 +100,8 @@ class PinsGame {
     }
 
     playSound(type) {
-        // Check if sound is enabled
-        if (!this.soundEnabled) {
+        // Check if sound is enabled and volume is not zero
+        if (!this.soundEnabled || this.volume === 0) {
             return;
         }
         
@@ -159,7 +176,8 @@ class PinsGame {
         filter.connect(gain);
         gain.connect(ctx.destination);
         
-        gain.gain.setValueAtTime(0.12, now);
+        const volume = (this.volume / 100) * 0.12;
+        gain.gain.setValueAtTime(volume, now);
         
         source.start(now);
         source.stop(now + 0.25);
@@ -178,7 +196,8 @@ class PinsGame {
         osc1.frequency.setValueAtTime(523, now); // C5
         osc2.frequency.setValueAtTime(659, now + 0.08); // E5
         
-        gain.gain.setValueAtTime(0.2, now);
+        const volume = (this.volume / 100) * 0.2;
+        gain.gain.setValueAtTime(volume, now);
         gain.gain.setValueAtTime(0.2, now + 0.08);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
         
@@ -203,8 +222,9 @@ class PinsGame {
             osc.type = 'sine';
             
             const startTime = now + (i * 0.1);
+            const volume = (this.volume / 100) * 0.15;
             gain.gain.setValueAtTime(0, startTime);
-            gain.gain.linearRampToValueAtTime(0.15, startTime + 0.05);
+            gain.gain.linearRampToValueAtTime(volume, startTime + 0.05);
             gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.6);
             
             osc.start(startTime);
@@ -221,8 +241,9 @@ class PinsGame {
         finalOsc.frequency.setValueAtTime(1047, now + 0.3); // C6
         finalOsc.type = 'sine';
         
+        const finalVolume = (this.volume / 100) * 0.2;
         finalGain.gain.setValueAtTime(0, now + 0.3);
-        finalGain.gain.linearRampToValueAtTime(0.2, now + 0.35);
+        finalGain.gain.linearRampToValueAtTime(finalVolume, now + 0.35);
         finalGain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
         
         finalOsc.start(now + 0.3);
@@ -936,6 +957,11 @@ class PinsGame {
                 this.colorTheme = settings.colorTheme || 'blue-red';
                 this.soundEnabled = settings.soundEnabled !== undefined ? settings.soundEnabled : true;
                 
+                // Load user settings
+                this.playerName = settings.playerName || 'Player';
+                this.selectedCountry = settings.selectedCountry || { code: 'US', name: 'United States', flag: '🇺🇸' };
+                this.volume = settings.volume !== undefined ? settings.volume : 100;
+                
                 // Load room settings
                 this.roomSettings = {
                     playerCount: settings.roomPlayerCount || 2,
@@ -960,6 +986,9 @@ class PinsGame {
                 difficulty: this.difficulty,
                 colorTheme: this.colorTheme,
                 soundEnabled: this.soundEnabled,
+                playerName: this.playerName,
+                selectedCountry: this.selectedCountry,
+                volume: this.volume,
                 roomPlayerCount: this.roomSettings.playerCount,
                 roomGridSize: this.roomSettings.gridSize,
                 lastUpdated: Date.now()
@@ -1023,6 +1052,340 @@ class PinsGame {
             } else {
                 soundBtn.classList.remove('active');
             }
+        }
+    }
+
+    // Settings Methods
+    getCountriesData() {
+        return [
+            { code: 'AF', name: 'Afghanistan', flag: '🇦🇫' },
+            { code: 'AL', name: 'Albania', flag: '🇦🇱' },
+            { code: 'DZ', name: 'Algeria', flag: '🇩🇿' },
+            { code: 'AD', name: 'Andorra', flag: '🇦🇩' },
+            { code: 'AO', name: 'Angola', flag: '🇦🇴' },
+            { code: 'AG', name: 'Antigua and Barbuda', flag: '🇦🇬' },
+            { code: 'AR', name: 'Argentina', flag: '🇦🇷' },
+            { code: 'AM', name: 'Armenia', flag: '🇦🇲' },
+            { code: 'AU', name: 'Australia', flag: '🇦🇺' },
+            { code: 'AT', name: 'Austria', flag: '🇦🇹' },
+            { code: 'AZ', name: 'Azerbaijan', flag: '🇦🇿' },
+            { code: 'BS', name: 'Bahamas', flag: '🇧🇸' },
+            { code: 'BH', name: 'Bahrain', flag: '🇧🇭' },
+            { code: 'BD', name: 'Bangladesh', flag: '🇧🇩' },
+            { code: 'BB', name: 'Barbados', flag: '🇧🇧' },
+            { code: 'BY', name: 'Belarus', flag: '🇧🇾' },
+            { code: 'BE', name: 'Belgium', flag: '🇧🇪' },
+            { code: 'BZ', name: 'Belize', flag: '🇧🇿' },
+            { code: 'BJ', name: 'Benin', flag: '🇧🇯' },
+            { code: 'BT', name: 'Bhutan', flag: '🇧🇹' },
+            { code: 'BO', name: 'Bolivia', flag: '🇧🇴' },
+            { code: 'BA', name: 'Bosnia and Herzegovina', flag: '🇧🇦' },
+            { code: 'BW', name: 'Botswana', flag: '🇧🇼' },
+            { code: 'BR', name: 'Brazil', flag: '🇧🇷' },
+            { code: 'BN', name: 'Brunei', flag: '🇧🇳' },
+            { code: 'BG', name: 'Bulgaria', flag: '🇧🇬' },
+            { code: 'BF', name: 'Burkina Faso', flag: '🇧🇫' },
+            { code: 'BI', name: 'Burundi', flag: '🇧🇮' },
+            { code: 'CV', name: 'Cabo Verde', flag: '🇨🇻' },
+            { code: 'KH', name: 'Cambodia', flag: '🇰🇭' },
+            { code: 'CM', name: 'Cameroon', flag: '🇨🇲' },
+            { code: 'CA', name: 'Canada', flag: '🇨🇦' },
+            { code: 'CF', name: 'Central African Republic', flag: '🇨🇫' },
+            { code: 'TD', name: 'Chad', flag: '🇹🇩' },
+            { code: 'CL', name: 'Chile', flag: '🇨🇱' },
+            { code: 'CN', name: 'China', flag: '🇨🇳' },
+            { code: 'CO', name: 'Colombia', flag: '🇨🇴' },
+            { code: 'KM', name: 'Comoros', flag: '🇰🇲' },
+            { code: 'CG', name: 'Congo', flag: '🇨🇬' },
+            { code: 'CR', name: 'Costa Rica', flag: '🇨🇷' },
+            { code: 'HR', name: 'Croatia', flag: '🇭🇷' },
+            { code: 'CU', name: 'Cuba', flag: '🇨🇺' },
+            { code: 'CY', name: 'Cyprus', flag: '🇨🇾' },
+            { code: 'CZ', name: 'Czech Republic', flag: '🇨🇿' },
+            { code: 'DK', name: 'Denmark', flag: '🇩🇰' },
+            { code: 'DJ', name: 'Djibouti', flag: '🇩🇯' },
+            { code: 'DM', name: 'Dominica', flag: '🇩🇲' },
+            { code: 'DO', name: 'Dominican Republic', flag: '🇩🇴' },
+            { code: 'EC', name: 'Ecuador', flag: '🇪🇨' },
+            { code: 'EG', name: 'Egypt', flag: '🇪🇬' },
+            { code: 'SV', name: 'El Salvador', flag: '🇸🇻' },
+            { code: 'GQ', name: 'Equatorial Guinea', flag: '🇬🇶' },
+            { code: 'ER', name: 'Eritrea', flag: '🇪🇷' },
+            { code: 'EE', name: 'Estonia', flag: '🇪🇪' },
+            { code: 'SZ', name: 'Eswatini', flag: '🇸🇿' },
+            { code: 'ET', name: 'Ethiopia', flag: '🇪🇹' },
+            { code: 'FJ', name: 'Fiji', flag: '🇫🇯' },
+            { code: 'FI', name: 'Finland', flag: '🇫🇮' },
+            { code: 'FR', name: 'France', flag: '🇫🇷' },
+            { code: 'GA', name: 'Gabon', flag: '🇬🇦' },
+            { code: 'GM', name: 'Gambia', flag: '🇬🇲' },
+            { code: 'GE', name: 'Georgia', flag: '🇬🇪' },
+            { code: 'DE', name: 'Germany', flag: '🇩🇪' },
+            { code: 'GH', name: 'Ghana', flag: '🇬🇭' },
+            { code: 'GR', name: 'Greece', flag: '🇬🇷' },
+            { code: 'GD', name: 'Grenada', flag: '🇬🇩' },
+            { code: 'GT', name: 'Guatemala', flag: '🇬🇹' },
+            { code: 'GN', name: 'Guinea', flag: '🇬🇳' },
+            { code: 'GW', name: 'Guinea-Bissau', flag: '🇬🇼' },
+            { code: 'GY', name: 'Guyana', flag: '🇬🇾' },
+            { code: 'HT', name: 'Haiti', flag: '🇭🇹' },
+            { code: 'HN', name: 'Honduras', flag: '🇭🇳' },
+            { code: 'HU', name: 'Hungary', flag: '🇭🇺' },
+            { code: 'IS', name: 'Iceland', flag: '🇮🇸' },
+            { code: 'IN', name: 'India', flag: '🇮🇳' },
+            { code: 'ID', name: 'Indonesia', flag: '🇮🇩' },
+            { code: 'IR', name: 'Iran', flag: '🇮🇷' },
+            { code: 'IQ', name: 'Iraq', flag: '🇮🇶' },
+            { code: 'IE', name: 'Ireland', flag: '🇮🇪' },
+            { code: 'IL', name: 'Israel', flag: '🇮🇱' },
+            { code: 'IT', name: 'Italy', flag: '🇮🇹' },
+            { code: 'JM', name: 'Jamaica', flag: '🇯🇲' },
+            { code: 'JP', name: 'Japan', flag: '🇯🇵' },
+            { code: 'JO', name: 'Jordan', flag: '🇯🇴' },
+            { code: 'KZ', name: 'Kazakhstan', flag: '🇰🇿' },
+            { code: 'KE', name: 'Kenya', flag: '🇰🇪' },
+            { code: 'KI', name: 'Kiribati', flag: '🇰🇮' },
+            { code: 'KP', name: 'North Korea', flag: '🇰🇵' },
+            { code: 'KR', name: 'South Korea', flag: '🇰🇷' },
+            { code: 'KW', name: 'Kuwait', flag: '🇰🇼' },
+            { code: 'KG', name: 'Kyrgyzstan', flag: '🇰🇬' },
+            { code: 'LA', name: 'Laos', flag: '🇱🇦' },
+            { code: 'LV', name: 'Latvia', flag: '🇱🇻' },
+            { code: 'LB', name: 'Lebanon', flag: '🇱🇧' },
+            { code: 'LS', name: 'Lesotho', flag: '🇱🇸' },
+            { code: 'LR', name: 'Liberia', flag: '🇱🇷' },
+            { code: 'LY', name: 'Libya', flag: '🇱🇾' },
+            { code: 'LI', name: 'Liechtenstein', flag: '🇱🇮' },
+            { code: 'LT', name: 'Lithuania', flag: '🇱🇹' },
+            { code: 'LU', name: 'Luxembourg', flag: '🇱🇺' },
+            { code: 'MG', name: 'Madagascar', flag: '🇲🇬' },
+            { code: 'MW', name: 'Malawi', flag: '🇲🇼' },
+            { code: 'MY', name: 'Malaysia', flag: '🇲🇾' },
+            { code: 'MV', name: 'Maldives', flag: '🇲🇻' },
+            { code: 'ML', name: 'Mali', flag: '🇲🇱' },
+            { code: 'MT', name: 'Malta', flag: '🇲🇹' },
+            { code: 'MH', name: 'Marshall Islands', flag: '🇲🇭' },
+            { code: 'MR', name: 'Mauritania', flag: '🇲🇷' },
+            { code: 'MU', name: 'Mauritius', flag: '🇲🇺' },
+            { code: 'MX', name: 'Mexico', flag: '🇲🇽' },
+            { code: 'FM', name: 'Micronesia', flag: '🇫🇲' },
+            { code: 'MD', name: 'Moldova', flag: '🇲🇩' },
+            { code: 'MC', name: 'Monaco', flag: '🇲🇨' },
+            { code: 'MN', name: 'Mongolia', flag: '🇲🇳' },
+            { code: 'ME', name: 'Montenegro', flag: '🇲🇪' },
+            { code: 'MA', name: 'Morocco', flag: '🇲🇦' },
+            { code: 'MZ', name: 'Mozambique', flag: '🇲🇿' },
+            { code: 'MM', name: 'Myanmar', flag: '🇲🇲' },
+            { code: 'NA', name: 'Namibia', flag: '🇳🇦' },
+            { code: 'NR', name: 'Nauru', flag: '🇳🇷' },
+            { code: 'NP', name: 'Nepal', flag: '🇳🇵' },
+            { code: 'NL', name: 'Netherlands', flag: '🇳🇱' },
+            { code: 'NZ', name: 'New Zealand', flag: '🇳🇿' },
+            { code: 'NI', name: 'Nicaragua', flag: '🇳🇮' },
+            { code: 'NE', name: 'Niger', flag: '🇳🇪' },
+            { code: 'NG', name: 'Nigeria', flag: '🇳🇬' },
+            { code: 'MK', name: 'North Macedonia', flag: '🇲🇰' },
+            { code: 'NO', name: 'Norway', flag: '🇳🇴' },
+            { code: 'OM', name: 'Oman', flag: '🇴🇲' },
+            { code: 'PK', name: 'Pakistan', flag: '🇵🇰' },
+            { code: 'PW', name: 'Palau', flag: '🇵🇼' },
+            { code: 'PA', name: 'Panama', flag: '🇵🇦' },
+            { code: 'PG', name: 'Papua New Guinea', flag: '🇵🇬' },
+            { code: 'PY', name: 'Paraguay', flag: '🇵🇾' },
+            { code: 'PE', name: 'Peru', flag: '🇵🇪' },
+            { code: 'PH', name: 'Philippines', flag: '🇵🇭' },
+            { code: 'PL', name: 'Poland', flag: '🇵🇱' },
+            { code: 'PT', name: 'Portugal', flag: '🇵🇹' },
+            { code: 'QA', name: 'Qatar', flag: '🇶🇦' },
+            { code: 'RO', name: 'Romania', flag: '🇷🇴' },
+            { code: 'RU', name: 'Russia', flag: '🇷🇺' },
+            { code: 'RW', name: 'Rwanda', flag: '🇷🇼' },
+            { code: 'KN', name: 'Saint Kitts and Nevis', flag: '🇰🇳' },
+            { code: 'LC', name: 'Saint Lucia', flag: '🇱🇨' },
+            { code: 'VC', name: 'Saint Vincent and the Grenadines', flag: '🇻🇨' },
+            { code: 'WS', name: 'Samoa', flag: '🇼🇸' },
+            { code: 'SM', name: 'San Marino', flag: '🇸🇲' },
+            { code: 'ST', name: 'Sao Tome and Principe', flag: '🇸🇹' },
+            { code: 'SA', name: 'Saudi Arabia', flag: '🇸🇦' },
+            { code: 'SN', name: 'Senegal', flag: '🇸🇳' },
+            { code: 'RS', name: 'Serbia', flag: '🇷🇸' },
+            { code: 'SC', name: 'Seychelles', flag: '🇸🇨' },
+            { code: 'SL', name: 'Sierra Leone', flag: '🇸🇱' },
+            { code: 'SG', name: 'Singapore', flag: '🇸🇬' },
+            { code: 'SK', name: 'Slovakia', flag: '🇸🇰' },
+            { code: 'SI', name: 'Slovenia', flag: '🇸🇮' },
+            { code: 'SB', name: 'Solomon Islands', flag: '🇸🇧' },
+            { code: 'SO', name: 'Somalia', flag: '🇸🇴' },
+            { code: 'ZA', name: 'South Africa', flag: '🇿🇦' },
+            { code: 'SS', name: 'South Sudan', flag: '🇸🇸' },
+            { code: 'ES', name: 'Spain', flag: '🇪🇸' },
+            { code: 'LK', name: 'Sri Lanka', flag: '🇱🇰' },
+            { code: 'SD', name: 'Sudan', flag: '🇸🇩' },
+            { code: 'SR', name: 'Suriname', flag: '🇸🇷' },
+            { code: 'SE', name: 'Sweden', flag: '🇸🇪' },
+            { code: 'CH', name: 'Switzerland', flag: '🇨🇭' },
+            { code: 'SY', name: 'Syria', flag: '🇸🇾' },
+            { code: 'TJ', name: 'Tajikistan', flag: '🇹🇯' },
+            { code: 'TZ', name: 'Tanzania', flag: '🇹🇿' },
+            { code: 'TH', name: 'Thailand', flag: '🇹🇭' },
+            { code: 'TL', name: 'Timor-Leste', flag: '🇹🇱' },
+            { code: 'TG', name: 'Togo', flag: '🇹🇬' },
+            { code: 'TO', name: 'Tonga', flag: '🇹🇴' },
+            { code: 'TT', name: 'Trinidad and Tobago', flag: '🇹🇹' },
+            { code: 'TN', name: 'Tunisia', flag: '🇹🇳' },
+            { code: 'TR', name: 'Turkey', flag: '🇹🇷' },
+            { code: 'TM', name: 'Turkmenistan', flag: '🇹🇲' },
+            { code: 'TV', name: 'Tuvalu', flag: '🇹🇻' },
+            { code: 'UG', name: 'Uganda', flag: '🇺🇬' },
+            { code: 'UA', name: 'Ukraine', flag: '🇺🇦' },
+            { code: 'AE', name: 'United Arab Emirates', flag: '🇦🇪' },
+            { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
+            { code: 'US', name: 'United States', flag: '🇺🇸' },
+            { code: 'UY', name: 'Uruguay', flag: '🇺🇾' },
+            { code: 'UZ', name: 'Uzbekistan', flag: '🇺🇿' },
+            { code: 'VU', name: 'Vanuatu', flag: '🇻🇺' },
+            { code: 'VA', name: 'Vatican City', flag: '🇻🇦' },
+            { code: 'VE', name: 'Venezuela', flag: '🇻🇪' },
+            { code: 'VN', name: 'Vietnam', flag: '🇻🇳' },
+            { code: 'YE', name: 'Yemen', flag: '🇾🇪' },
+            { code: 'ZM', name: 'Zambia', flag: '🇿🇲' },
+            { code: 'ZW', name: 'Zimbabwe', flag: '🇿🇼' }
+        ];
+    }
+
+    showSettings() {
+        console.log('showSettings called');
+        const modal = document.getElementById('settings-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            // Force display with inline styles for debugging
+            modal.style.display = 'flex';
+            modal.style.zIndex = '99999';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.background = 'rgba(0, 0, 0, 0.8)';
+            
+            this.populateCountryDropdown();
+            this.updateSettingsUI();
+            console.log('Settings modal shown with inline styles');
+            console.log('Modal computed style:', window.getComputedStyle(modal).display);
+        } else {
+            console.error('Settings modal not found');
+        }
+    }
+
+    hideSettings() {
+        const modal = document.getElementById('settings-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        
+        const dropdown = document.getElementById('country-dropdown');
+        if (dropdown) {
+            dropdown.classList.add('hidden');
+        }
+    }
+
+    populateCountryDropdown() {
+        const countries = this.getCountriesData();
+        this.allCountries = countries;
+        this.renderCountryList(countries);
+        
+        // Set up search functionality
+        const searchInput = document.getElementById('country-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredCountries = countries.filter(country => 
+                    country.name.toLowerCase().includes(searchTerm)
+                );
+                this.renderCountryList(filteredCountries);
+            });
+        }
+    }
+
+    renderCountryList(countries) {
+        const countryList = document.getElementById('country-list');
+        if (!countryList) return;
+        
+        countryList.innerHTML = '';
+        countries.forEach(country => {
+            const option = document.createElement('div');
+            option.className = 'country-option';
+            option.innerHTML = `
+                <span class="flag-emoji">${country.flag}</span>
+                <span>${country.name}</span>
+            `;
+            option.addEventListener('click', () => {
+                this.selectCountry(country);
+            });
+            countryList.appendChild(option);
+        });
+    }
+
+    selectCountry(country) {
+        this.selectedCountry = country;
+        document.getElementById('selected-flag').textContent = country.flag;
+        document.getElementById('selected-country').textContent = country.name;
+        document.getElementById('country-dropdown').classList.add('hidden');
+        document.getElementById('country-btn').classList.remove('open');
+        this.saveCachedSettings();
+    }
+
+    updateSettingsUI() {
+        // Update player name
+        document.getElementById('player-name-input').value = this.playerName;
+        
+        // Update country selection
+        document.getElementById('selected-flag').textContent = this.selectedCountry.flag;
+        document.getElementById('selected-country').textContent = this.selectedCountry.name;
+        
+        // Update volume
+        document.getElementById('volume-slider').value = this.volume;
+        document.getElementById('volume-value').textContent = `${this.volume}%`;
+    }
+
+    updateVolume(value) {
+        this.volume = parseInt(value);
+        document.getElementById('volume-value').textContent = `${this.volume}%`;
+        this.saveCachedSettings();
+        
+        // Update audio context volume if available
+        if (this.audioContext && this.audioContext.state === 'running') {
+            // Volume will be applied to individual sounds
+        }
+    }
+
+    updatePlayerName(name) {
+        this.playerName = name.trim() || 'Player';
+        this.saveCachedSettings();
+    }
+
+    showPrivacy() {
+        const modal = document.getElementById('privacy-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.style.zIndex = '50000';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.background = 'rgba(0, 0, 0, 0.8)';
+            modal.classList.remove('hidden');
+            console.log('Privacy modal shown with z-index 50000');
+        }
+    }
+
+    hidePrivacy() {
+        const modal = document.getElementById('privacy-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
         }
     }
 
@@ -1573,6 +1936,95 @@ class PinsGame {
         if (playOnlineBtn) {
             playOnlineBtn.addEventListener('click', () => {
                 this.showOnlineScreen();
+            });
+        }
+
+        // Settings button
+        const settingsBtn = document.getElementById('settings-btn');
+        if (settingsBtn) {
+            console.log('Settings button found, adding event listener');
+            settingsBtn.addEventListener('click', (e) => {
+                console.log('Settings button clicked');
+                e.preventDefault();
+                e.stopPropagation();
+                this.showSettings();
+            });
+        } else {
+            console.error('Settings button not found');
+        }
+
+        // Settings modal events
+        const closeSettings = document.getElementById('close-settings');
+        if (closeSettings) {
+            closeSettings.addEventListener('click', () => {
+                this.hideSettings();
+            });
+        }
+
+        const settingsModal = document.getElementById('settings-modal');
+        if (settingsModal) {
+            settingsModal.addEventListener('click', (e) => {
+                if (e.target.id === 'settings-modal') {
+                    this.hideSettings();
+                }
+            });
+        }
+
+        // Player name input
+        const playerNameInput = document.getElementById('player-name-input');
+        if (playerNameInput) {
+            playerNameInput.addEventListener('input', (e) => {
+                this.updatePlayerName(e.target.value);
+            });
+        }
+
+        // Country selector
+        const countryBtn = document.getElementById('country-btn');
+        if (countryBtn) {
+            countryBtn.addEventListener('click', () => {
+                const dropdown = document.getElementById('country-dropdown');
+                const isOpen = !dropdown.classList.contains('hidden');
+                
+                if (isOpen) {
+                    dropdown.classList.add('hidden');
+                    countryBtn.classList.remove('open');
+                } else {
+                    dropdown.classList.remove('hidden');
+                    countryBtn.classList.add('open');
+                }
+            });
+        }
+
+        // Volume slider
+        const volumeSlider = document.getElementById('volume-slider');
+        if (volumeSlider) {
+            volumeSlider.addEventListener('input', (e) => {
+                this.updateVolume(e.target.value);
+            });
+        }
+
+        // Privacy button
+        const privacyBtn = document.getElementById('privacy-btn');
+        if (privacyBtn) {
+            privacyBtn.addEventListener('click', () => {
+                this.showPrivacy();
+            });
+        }
+
+        // Privacy modal events
+        const closePrivacy = document.getElementById('close-privacy');
+        if (closePrivacy) {
+            closePrivacy.addEventListener('click', () => {
+                this.hidePrivacy();
+            });
+        }
+
+        const privacyModal = document.getElementById('privacy-modal');
+        if (privacyModal) {
+            privacyModal.addEventListener('click', (e) => {
+                if (e.target.id === 'privacy-modal') {
+                    this.hidePrivacy();
+                }
             });
         }
 

@@ -12,6 +12,14 @@
 <body>
     <!-- Welcome Screen -->
     <div id="welcome-screen" class="start-screen">
+        <!-- Settings Icon -->
+        <button id="settings-btn" class="settings-btn" aria-label="Settings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
+            </svg>
+        </button>
+        
         <div class="start-content">
             <div class="logo-container">
                 <img src="favicon.ico" alt="Dots & Boxes" class="logo-icon">
@@ -491,6 +499,71 @@
             <button id="copy-room-code-btn" class="copy-code-btn">
                 Copy
             </button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content settings-modal-content">
+            <div class="settings-header">
+                <h3>Settings</h3>
+                <button id="close-settings" class="close-btn">×</button>
+            </div>
+            
+            <div class="settings-section">
+                <label class="settings-label">Name</label>
+                <input type="text" id="player-name-input" class="settings-input" placeholder="Your name" maxlength="20">
+            </div>
+
+            <div class="settings-section">
+                <label class="settings-label">Country</label>
+                <div class="country-selector">
+                    <button id="country-btn" class="country-btn">
+                        <span class="flag-emoji" id="selected-flag">🌍</span>
+                        <span id="selected-country">Select</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="country-dropdown" class="country-dropdown hidden">
+                        <input type="text" id="country-search" class="country-search" placeholder="Search countries...">
+                        <div id="country-list" class="country-list">
+                            <!-- Countries will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <label class="settings-label">Volume</label>
+                <div class="volume-control">
+                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="100">
+                    <span id="volume-value" class="volume-value">100%</span>
+                </div>
+            </div>
+
+            <div class="settings-footer">
+                <button id="privacy-btn" class="privacy-link-btn">Privacy Policy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacy-modal" class="modal hidden">
+        <div class="modal-content privacy-modal-content">
+            <div class="privacy-header">
+                <h3>Privacy Policy</h3>
+                <button id="close-privacy" class="close-btn">×</button>
+            </div>
+            <div class="privacy-content">
+                <p>Your privacy is important to us:</p>
+                <ul>
+                    <li>All data is stored locally on your device</li>
+                    <li>No personal information is transmitted to servers</li>
+                    <li>Room codes are temporary and stored locally</li>
+                    <li>You can clear all data by clearing browser storage</li>
+                </ul>
+            </div>
         </div>
     </div>
 
