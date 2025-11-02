@@ -861,9 +861,26 @@ class PinsGame {
     }
 
     restartGame() {
-        this.currentPlayer = 1;
+        // Store current game settings before reset
+        const currentGameMode = this.gameMode;
+        const currentPlayerCount = this.playerCount;
+        const currentGridSize = this.gridSize;
+        const currentDifficulty = this.difficulty;
+        const currentColorTheme = this.colorTheme;
         
-        // Reset scores for all players
+        // Reset game state but preserve current game settings
+        this.currentPlayer = 1;
+        this.gameOver = false;
+        this.gameStarted = false;
+        
+        // Restore game settings
+        this.gameMode = currentGameMode;
+        this.playerCount = currentPlayerCount;
+        this.gridSize = currentGridSize;
+        this.difficulty = currentDifficulty;
+        this.colorTheme = currentColorTheme;
+        
+        // Reset scores for current player count
         this.scores = {};
         for (let i = 1; i <= this.playerCount; i++) {
             this.scores[`player${i}`] = 0;
@@ -873,8 +890,6 @@ class PinsGame {
         this.drawnLines.clear();
         this.lastDrawnLine = null;
         this.boxes = [];
-        this.gameOver = false;
-        this.gameStarted = false;
 
         // Clear any existing turn text timeout
         if (this.turnTextTimeout) {
@@ -887,6 +902,7 @@ class PinsGame {
 
         document.getElementById('game-over-modal').classList.add('hidden');
         document.getElementById('menu-modal').classList.add('hidden');
+        document.getElementById('win-screen').classList.add('hidden');
         document.body.className = 'player1-turn'; // Reset to player 1
         document.body.setAttribute('data-player-count', this.playerCount);
         this.initializeGame();
@@ -946,6 +962,61 @@ class PinsGame {
             return themeColors[this.colorTheme]?.[playerNum - 1] || this.playerColors[2][playerNum - 1];
         }
         return this.playerColors[this.playerCount][playerNum - 1];
+    }
+
+    resetGameState() {
+        // Reset all game variables to defaults
+        this.currentPlayer = 1;
+        this.gameOver = false;
+        this.gameStarted = false;
+        this.gameMode = '2player';
+        this.difficulty = 'easy';
+        this.playerCount = 2;
+        this.gridSize = 6;
+        this.colorTheme = 'blue-red';
+        this.soundEnabled = true;
+        this.volume = 100;
+        
+        // Reset scores
+        this.scores = {};
+        for (let i = 1; i <= this.playerCount; i++) {
+            this.scores[`player${i}`] = 0;
+        }
+        
+        // Clear game data
+        this.lines.clear();
+        this.drawnLines.clear();
+        this.lastDrawnLine = null;
+        this.boxes = [];
+        
+        // Clear timeouts
+        if (this.turnTextTimeout) {
+            clearTimeout(this.turnTextTimeout);
+            this.turnTextTimeout = null;
+        }
+        
+        // Reset online state
+        this.isOnlineMode = false;
+        this.roomCode = null;
+        this.playerId = null;
+        this.isHost = false;
+        this.roomPlayers = [];
+        this.onlineGameStarted = false;
+        
+        // Reset bot state
+        this.botThinking = false;
+        this.botMakingMove = false;
+        
+        // Reset room settings
+        this.roomSettings = {
+            playerCount: 2,
+            gridSize: 6
+        };
+        
+        // Reset body classes
+        document.body.className = '';
+        document.body.removeAttribute('data-theme');
+        document.body.removeAttribute('data-player-count');
     }
 
     resetColorTheme() {
@@ -2765,13 +2836,39 @@ class PinsGame {
     }
 
     showStartScreen() {
+        // Reset game state when switching to multiplayer mode
+        this.resetGameState();
+        
+        // Hide game container if it's showing
+        document.querySelector('.game-container').classList.add('hidden');
+        document.getElementById('menu-modal').classList.add('hidden');
+        document.getElementById('game-over-modal').classList.add('hidden');
+        document.getElementById('win-screen').classList.add('hidden');
+        
+        // Show multiplayer setup screen
         document.getElementById('welcome-screen').classList.add('hidden');
         document.getElementById('start-screen').classList.remove('hidden');
+        
+        // Reset UI to defaults
+        this.resetAllUIToDefaults();
     }
 
     showComputerScreen() {
+        // Reset game state when switching to single player mode
+        this.resetGameState();
+        
+        // Hide game container if it's showing
+        document.querySelector('.game-container').classList.add('hidden');
+        document.getElementById('menu-modal').classList.add('hidden');
+        document.getElementById('game-over-modal').classList.add('hidden');
+        document.getElementById('win-screen').classList.add('hidden');
+        
+        // Show computer setup screen
         document.getElementById('welcome-screen').classList.add('hidden');
         document.getElementById('computer-screen').classList.remove('hidden');
+        
+        // Reset UI to defaults
+        this.resetAllUIToDefaults();
     }
 
     changeDifficulty(direction) {
@@ -4797,6 +4894,19 @@ class PinsGame {
             clearInterval(this.lobbyInterval);
             this.lobbyInterval = null;
         }
+        if (this.gameInterval) {
+            clearInterval(this.gameInterval);
+            this.gameInterval = null;
+        }
+        
+        // Reset game state completely
+        this.resetGameState();
+        
+        // Hide game container and all modals
+        document.querySelector('.game-container').classList.add('hidden');
+        document.getElementById('menu-modal').classList.add('hidden');
+        document.getElementById('game-over-modal').classList.add('hidden');
+        document.getElementById('win-screen').classList.add('hidden');
         
         // Hide all screens except welcome
         document.getElementById('start-screen').classList.add('hidden');
@@ -4806,6 +4916,9 @@ class PinsGame {
         document.getElementById('join-room-screen').classList.add('hidden');
         document.getElementById('room-lobby-screen').classList.add('hidden');
         document.getElementById('welcome-screen').classList.remove('hidden');
+        
+        // Reset UI to defaults
+        this.resetAllUIToDefaults();
     }
 
     returnToHome() {
