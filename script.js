@@ -868,12 +868,22 @@ class PinsGame {
     }
 
     restartGame() {
+        console.log('restartGame() called');
+        
         // Store current game settings before reset
         const currentGameMode = this.gameMode;
         const currentPlayerCount = this.playerCount;
         const currentGridSize = this.gridSize;
         const currentDifficulty = this.difficulty;
         const currentColorTheme = this.colorTheme;
+        
+        console.log('Current game settings:', {
+            gameMode: currentGameMode,
+            playerCount: currentPlayerCount,
+            gridSize: currentGridSize,
+            difficulty: currentDifficulty,
+            colorTheme: currentColorTheme
+        });
         
         // Reset game state but preserve current game settings
         this.currentPlayer = 1;
@@ -2638,13 +2648,42 @@ class PinsGame {
             this.hideMenu();
         });
 
-        const restartGameBtn = document.getElementById('restart-game-btn');
-        if (restartGameBtn) {
-            restartGameBtn.addEventListener('click', () => {
+        // Use a more robust approach for the restart button
+        const setupRestartButton = () => {
+            const restartGameBtn = document.getElementById('restart-game-btn');
+            if (restartGameBtn) {
+                // Remove any existing listeners by cloning
+                const newRestartBtn = restartGameBtn.cloneNode(true);
+                restartGameBtn.parentNode.replaceChild(newRestartBtn, restartGameBtn);
+                
+                // Add fresh event listener
+                newRestartBtn.addEventListener('click', (e) => {
+                    console.log('Restart game button clicked from menu');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    document.getElementById('menu-modal').classList.add('hidden');
+                    this.restartGame();
+                });
+                console.log('Restart button event listener attached');
+            } else {
+                console.error('Restart game button not found');
+            }
+        };
+        
+        // Set up the restart button immediately and also after a delay
+        setupRestartButton();
+        setTimeout(setupRestartButton, 100);
+        
+        // Also add event delegation as a fallback
+        document.addEventListener('click', (e) => {
+            if (e.target && e.target.id === 'restart-game-btn') {
+                console.log('Restart button clicked via event delegation');
+                e.preventDefault();
+                e.stopPropagation();
                 document.getElementById('menu-modal').classList.add('hidden');
                 this.restartGame();
-            });
-        }
+            }
+        });
 
         document.getElementById('return-home-btn').addEventListener('click', () => {
             this.returnToHome();
