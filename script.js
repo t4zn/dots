@@ -907,9 +907,23 @@ class PinsGame {
         // Force color theme reset
         this.resetColorTheme();
 
+        // Hide all modals
         document.getElementById('game-over-modal').classList.add('hidden');
         document.getElementById('menu-modal').classList.add('hidden');
         document.getElementById('win-screen').classList.add('hidden');
+        
+        // Ensure game container is visible
+        document.querySelector('.game-container').classList.remove('hidden');
+        
+        // Hide all other screens
+        document.getElementById('welcome-screen').classList.add('hidden');
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('computer-screen').classList.add('hidden');
+        document.getElementById('online-screen').classList.add('hidden');
+        document.getElementById('create-room-screen').classList.add('hidden');
+        document.getElementById('join-room-screen').classList.add('hidden');
+        document.getElementById('room-lobby-screen').classList.add('hidden');
+        
         document.body.className = 'player1-turn'; // Reset to player 1
         document.body.setAttribute('data-player-count', this.playerCount);
         this.initializeGame();
