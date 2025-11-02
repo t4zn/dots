@@ -47,9 +47,9 @@ class PinsGame {
         // Player colors based on player count
         this.playerColors = {
             2: ['#3b82f6', '#ef4444'], // Blue, Red
-            3: ['#ef4444', '#3b82f6', '#10b981'], // Red, Blue, Green
-            4: ['#ef4444', '#3b82f6', '#10b981', '#eab308'], // Red, Blue, Green, Yellow
-            5: ['#ef4444', '#3b82f6', '#10b981', '#eab308', '#a855f7'] // Red, Blue, Green, Yellow, Purple
+            3: ['#3b82f6', '#ef4444', '#10b981'], // Blue, Red, Green
+            4: ['#3b82f6', '#ef4444', '#10b981', '#eab308'], // Blue, Red, Green, Yellow
+            5: ['#3b82f6', '#ef4444', '#10b981', '#eab308', '#a855f7'] // Blue, Red, Green, Yellow, Purple
         };
 
 
