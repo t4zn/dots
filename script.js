@@ -61,17 +61,7 @@ class PinsGame {
         setTimeout(() => {
             this.resetAllUIToDefaults();
             
-            // Additional settings button setup as fallback
-            const settingsBtn = document.getElementById('settings-btn');
-            if (settingsBtn && !settingsBtn.hasAttribute('data-listener-added')) {
-                settingsBtn.setAttribute('data-listener-added', 'true');
-                settingsBtn.onclick = (e) => {
-                    console.log('Settings button clicked via onclick');
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.showSettings();
-                };
-            }
+            // Settings button removed from welcome screen
         }, 100);
     }
 
@@ -2396,19 +2386,7 @@ class PinsGame {
             });
         }
 
-        // Settings button
-        const settingsBtn = document.getElementById('settings-btn');
-        if (settingsBtn) {
-            console.log('Settings button found, adding event listener');
-            settingsBtn.addEventListener('click', (e) => {
-                console.log('Settings button clicked');
-                e.preventDefault();
-                e.stopPropagation();
-                this.showSettings();
-            });
-        } else {
-            console.error('Settings button not found');
-        }
+        // Settings button removed from welcome screen - now accessible via game menu
 
         // Settings modal events
         const closeSettings = document.getElementById('close-settings');
@@ -2687,6 +2665,11 @@ class PinsGame {
 
         document.getElementById('return-home-btn').addEventListener('click', () => {
             this.returnToHome();
+        });
+
+        document.getElementById('menu-settings-btn').addEventListener('click', () => {
+            this.hideMenu();
+            this.showSettings();
         });
 
         document.getElementById('play-again-btn').addEventListener('click', () => {

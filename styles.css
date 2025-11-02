@@ -1500,16 +1500,7 @@ body.player5-turn .turn-display {
     }
 }
 
-/* Settings Button - Show on Mobile, Hide on Desktop */
-.settings-btn {
-    display: flex !important; /* Show by default (mobile-first) */
-}
-
-@media (min-width: 769px) {
-    .settings-btn {
-        display: none !important; /* Hide on desktop */
-    }
-}
+/* Settings Button - No longer on welcome screen */
 
 /* Welcome Screen Options */
 .welcome-options {
@@ -2438,35 +2429,7 @@ Start Screen */
         }
     }
 
-    /* Settings Button */
-    .settings-btn {
-        position: absolute;
-        top: 24px;
-        left: 24px;
-        background: transparent;
-        border: none;
-        width: 40px;
-        height: 40px;
-        display: flex !important; /* Show by default (mobile-first) */
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        color: rgba(0, 0, 0, 0.5);
-        z-index: 15000;
-        pointer-events: auto;
-        border-radius: 50%;
-    }
-
-    .settings-btn:hover {
-        color: rgba(0, 0, 0, 0.8);
-        transform: scale(1.1);
-    }
-
-    .settings-btn:active {
-        transform: scale(0.95);
-        transition-duration: 0.1s;
-    }
+    /* Settings Button - Removed from welcome screen */
 
     /* Settings Modal */
     .settings-modal-content {
@@ -2907,23 +2870,10 @@ Start Screen */
         margin-bottom: 8px;
     }
 
-    /* Hide settings button on non-welcome screens */
-    .start-screen:not(#welcome-screen) .settings-btn {
-        display: none;
-    }
+    /* Settings button no longer exists on welcome screen */
 
     @media (max-width: 480px) {
-        .settings-btn {
-            top: 20px;
-            left: 20px;
-            width: 36px;
-            height: 36px;
-        }
-
-        .settings-btn svg {
-            width: 16px;
-            height: 16px;
-        }
+        /* Settings button removed from welcome screen */
 
         .settings-modal-content {
             width: calc(100vw - 40px);
