@@ -868,22 +868,12 @@ class PinsGame {
     }
 
     restartGame() {
-        console.log('restartGame() called');
-        
         // Store current game settings before reset
         const currentGameMode = this.gameMode;
         const currentPlayerCount = this.playerCount;
         const currentGridSize = this.gridSize;
         const currentDifficulty = this.difficulty;
         const currentColorTheme = this.colorTheme;
-        
-        console.log('Current game settings:', {
-            gameMode: currentGameMode,
-            playerCount: currentPlayerCount,
-            gridSize: currentGridSize,
-            difficulty: currentDifficulty,
-            colorTheme: currentColorTheme
-        });
         
         // Reset game state but preserve current game settings
         this.currentPlayer = 1;
@@ -1074,13 +1064,26 @@ class PinsGame {
         document.body.setAttribute('data-player-count', this.playerCount);
         document.body.classList.add(`player${this.currentPlayer}-turn`);
         
-        // Clear any lingering line classes from previous games
-        document.querySelectorAll('.line').forEach(line => {
-            line.className = line.className.replace(/player\d+-(line|hover)/g, '');
-            if (!line.classList.contains('drawn')) {
-                line.classList.add(`player${this.currentPlayer}-hover`);
+        // Clear any lingering line classes from previous games (only if lines exist)
+        try {
+            const lines = document.querySelectorAll('.line');
+            if (lines.length > 0) {
+                lines.forEach(line => {
+                    if (line && line.classList) {
+                        // Remove player-specific classes
+                        line.classList.remove('player1-line', 'player2-line', 'player3-line', 'player4-line', 'player5-line');
+                        line.classList.remove('player1-hover', 'player2-hover', 'player3-hover', 'player4-hover', 'player5-hover');
+                        
+                        // Add current player hover if not drawn
+                        if (!line.classList.contains('drawn')) {
+                            line.classList.add(`player${this.currentPlayer}-hover`);
+                        }
+                    }
+                });
             }
-        });
+        } catch (e) {
+            console.warn('Error resetting line classes:', e);
+        }
         
         // Update theme buttons
         document.querySelectorAll('.color-theme-btn').forEach(btn => {
@@ -2658,13 +2661,11 @@ class PinsGame {
                 
                 // Add fresh event listener
                 newRestartBtn.addEventListener('click', (e) => {
-                    console.log('Restart game button clicked from menu');
                     e.preventDefault();
                     e.stopPropagation();
                     document.getElementById('menu-modal').classList.add('hidden');
                     this.restartGame();
                 });
-                console.log('Restart button event listener attached');
             } else {
                 console.error('Restart game button not found');
             }
@@ -2677,7 +2678,6 @@ class PinsGame {
         // Also add event delegation as a fallback
         document.addEventListener('click', (e) => {
             if (e.target && e.target.id === 'restart-game-btn') {
-                console.log('Restart button clicked via event delegation');
                 e.preventDefault();
                 e.stopPropagation();
                 document.getElementById('menu-modal').classList.add('hidden');
