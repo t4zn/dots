@@ -34,10 +34,10 @@ class PinsGame {
         this.onlineGameStarted = false;
         this.startGameTimeout = null;
         
-        // Settings properties - will be loaded from cache
+        // Settings properties - always defaults
         this.playerName = 'Player';
         this.selectedCountry = { code: 'US', name: 'United States', flag: '🇺🇸' };
-        this.volume = 100; // Always reset to 100
+        this.volume = 100;
         
         // Initialize scores for default player count
         for (let i = 1; i <= this.playerCount; i++) {
@@ -52,17 +52,14 @@ class PinsGame {
             5: ['#ef4444', '#3b82f6', '#10b981', '#eab308', '#a855f7'] // Red, Blue, Green, Yellow, Purple
         };
 
-        // Load cached settings (without UI updates)
-        this.loadCachedSettings(false);
+
         
         this.setupEventListeners();
         this.initAudio();
-        this.cleanupOldRooms();
         
         // Update UI after DOM is ready
         setTimeout(() => {
             this.resetAllUIToDefaults();
-            this.updateUIWithCachedSettings(); // Only updates name and country
             
             // Additional settings button setup as fallback
             const settingsBtn = document.getElementById('settings-btn');
@@ -955,7 +952,7 @@ class PinsGame {
         // Clear any existing player turn classes that might conflict
         document.body.className = '';
         
-        // Force reset color theme to prevent cache conflicts
+        // Force reset color theme
         if (this.playerCount !== 2) {
             // For 3+ players, always use default theme
             this.colorTheme = 'blue-red';
@@ -1062,66 +1059,7 @@ class PinsGame {
         this.showNotification('Joined ongoing game!');
     }
 
-    cleanupOldRooms() {
-        // Clean up rooms older than 1 hour
-        const oneHour = 60 * 60 * 1000;
-        const now = Date.now();
-        
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith('room_')) {
-                try {
-                    const roomData = JSON.parse(localStorage.getItem(key));
-                    if (roomData && roomData.created && (now - roomData.created) > oneHour) {
-                        localStorage.removeItem(key);
-                        i--; // Adjust index since we removed an item
-                    }
-                } catch (e) {
-                    // Invalid room data, remove it
-                    localStorage.removeItem(key);
-                    i--;
-                }
-            }
-        }
-    }
 
-    // Minimal Caching Methods - Only name and country
-    loadCachedSettings(updateUI = true) {
-        try {
-            // Clear old cache key to prevent conflicts
-            localStorage.removeItem('dotsBoxesSettings');
-            
-            const cachedSettings = localStorage.getItem('dotsBoxesUserSettings');
-            if (cachedSettings) {
-                const settings = JSON.parse(cachedSettings);
-                
-                // Only load user identity settings
-                this.playerName = settings.playerName || 'Player';
-                this.selectedCountry = settings.selectedCountry || { code: 'US', name: 'United States', flag: '🇺🇸' };
-                
-                // Update UI elements with cached values only if requested
-                if (updateUI) {
-                    this.updateUIWithCachedSettings();
-                }
-            }
-        } catch (e) {
-            console.warn('Failed to load cached settings:', e);
-        }
-    }
-
-    saveCachedSettings() {
-        try {
-            const settings = {
-                playerName: this.playerName,
-                selectedCountry: this.selectedCountry,
-                lastUpdated: Date.now()
-            };
-            
-            localStorage.setItem('dotsBoxesUserSettings', JSON.stringify(settings));
-        } catch (e) {
-            console.warn('Failed to save settings:', e);
-        }
-    }
 
     updateDifficultyColor(difficultyDisplay) {
         // Remove all difficulty color classes
@@ -1190,23 +1128,7 @@ class PinsGame {
         if (volumeValue) volumeValue.textContent = '100%';
     }
 
-    updateUIWithCachedSettings() {
-        // Only update user identity settings from cache
-        
-        // Update player name
-        const playerNameInput = document.getElementById('player-name-input');
-        if (playerNameInput) {
-            playerNameInput.value = this.playerName;
-        }
-        
-        // Update country selection
-        const selectedFlag = document.getElementById('selected-flag');
-        const selectedCountry = document.getElementById('selected-country');
-        if (selectedFlag && selectedCountry) {
-            selectedFlag.textContent = this.selectedCountry.flag;
-            selectedCountry.textContent = this.selectedCountry.name;
-        }
-    }
+
 
     // Settings Methods
     getCountriesData() {
@@ -1486,7 +1408,6 @@ class PinsGame {
         document.getElementById('selected-country').textContent = country.name;
         document.getElementById('country-dropdown').classList.add('hidden');
         document.getElementById('country-btn').classList.remove('open');
-        this.saveCachedSettings();
     }
 
     updateSettingsUI() {
@@ -1514,7 +1435,6 @@ class PinsGame {
 
     updatePlayerName(name) {
         this.playerName = name.trim() || 'Player';
-        this.saveCachedSettings();
     }
 
     showPrivacy() {
@@ -1571,32 +1491,7 @@ class PinsGame {
 
 
 
-    cacheRecentRoomCode(roomCode) {
-        try {
-            let recentRooms = JSON.parse(localStorage.getItem('dotsBoxesRecentRooms') || '[]');
-            
-            // Remove if already exists
-            recentRooms = recentRooms.filter(code => code !== roomCode);
-            
-            // Add to beginning
-            recentRooms.unshift(roomCode);
-            
-            // Keep only last 5 room codes
-            recentRooms = recentRooms.slice(0, 5);
-            
-            localStorage.setItem('dotsBoxesRecentRooms', JSON.stringify(recentRooms));
-        } catch (e) {
-            console.warn('Failed to cache room code:', e);
-        }
-    }
 
-    getRecentRoomCodes() {
-        try {
-            return JSON.parse(localStorage.getItem('dotsBoxesRecentRooms') || '[]');
-        } catch (e) {
-            return [];
-        }
-    }
 
     async createRoom() {
         this.roomCode = this.generateRoomCode();
@@ -1604,8 +1499,7 @@ class PinsGame {
         this.isHost = true;
         this.isOnlineMode = true;
         
-        // Cache the room code for quick access
-        this.cacheRecentRoomCode(this.roomCode);
+
         
         // Initialize room with host player
         this.roomPlayers = [{
@@ -1669,7 +1563,7 @@ class PinsGame {
                 this.showRoomLobby();
             }
             
-            this.cacheRecentRoomCode(roomCode);
+
             
             // Immediately check room status
             setTimeout(async () => {
@@ -1713,8 +1607,7 @@ class PinsGame {
             this.showRoomLobby();
         }
         
-        // Cache the room code for quick access
-        this.cacheRecentRoomCode(roomCode);
+
         
         // Immediately check if game should start (for host) or if game already started
         setTimeout(async () => {
@@ -1740,12 +1633,10 @@ class PinsGame {
                 }
             }
         } catch (error) {
-            console.log('Server fetch failed, using localStorage:', error);
+            console.log('Server fetch failed:', error);
         }
         
-        // Fallback to localStorage for same-device testing
-        const data = localStorage.getItem(`room_${roomCode}`);
-        return data ? JSON.parse(data) : null;
+        return null;
     }
 
     async updateRoomData(roomData) {
@@ -1780,11 +1671,8 @@ class PinsGame {
                 throw new Error('JSONBin update failed');
             }
         } catch (error) {
-            console.log('Server update failed, using localStorage:', error);
+            console.log('Server update failed:', error);
         }
-        
-        // Always update localStorage as backup
-        localStorage.setItem(`room_${this.roomCode}`, JSON.stringify(roomData));
     }
 
     async leaveRoom() {
@@ -1821,7 +1709,6 @@ class PinsGame {
                 } catch (error) {
                     console.log('Failed to delete room from server:', error);
                 }
-                localStorage.removeItem(`room_${this.roomCode}`);
             } else {
                 // If host left, make next player host
                 if (this.isHost && roomData.players.length > 0) {
@@ -5021,7 +4908,7 @@ class PinsGame {
     forceColorRefresh() {
         console.log('Force refreshing colors...');
         
-        // Clear all cached styles
+        // Clear all styles
         document.body.className = '';
         document.body.removeAttribute('data-theme');
         document.body.removeAttribute('data-player-count');
