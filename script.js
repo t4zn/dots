@@ -252,6 +252,13 @@ class PinsGame {
     initializeGame() {
         // Ensure colors are properly reset
         this.resetColorTheme();
+        
+        // Clear any existing grid first
+        const svg = document.getElementById('game-svg');
+        if (svg) {
+            svg.innerHTML = '';
+        }
+        
         this.createGrid();
         this.updateUI();
     }
@@ -988,6 +995,12 @@ class PinsGame {
         this.drawnLines.clear();
         this.lastDrawnLine = null;
         this.boxes = [];
+        
+        // Clear the SVG completely to remove any leftover lines
+        const svg = document.getElementById('game-svg');
+        if (svg) {
+            svg.innerHTML = '';
+        }
         
         // Clear timeouts
         if (this.turnTextTimeout) {
@@ -2614,6 +2627,7 @@ class PinsGame {
         const restartGameBtn = document.getElementById('restart-game-btn');
         if (restartGameBtn) {
             restartGameBtn.addEventListener('click', () => {
+                document.getElementById('menu-modal').classList.add('hidden');
                 this.restartGame();
             });
         }
@@ -2623,6 +2637,7 @@ class PinsGame {
         });
 
         document.getElementById('play-again-btn').addEventListener('click', () => {
+            document.getElementById('game-over-modal').classList.add('hidden');
             this.restartGame();
         });
 
@@ -2836,8 +2851,8 @@ class PinsGame {
     }
 
     showStartScreen() {
-        // Reset game state when switching to multiplayer mode
-        this.resetGameState();
+        // Force complete refresh to clear any leftover game state
+        this.forceGameRefresh();
         
         // Hide game container if it's showing
         document.querySelector('.game-container').classList.add('hidden');
@@ -2854,8 +2869,8 @@ class PinsGame {
     }
 
     showComputerScreen() {
-        // Reset game state when switching to single player mode
-        this.resetGameState();
+        // Force complete refresh to clear any leftover game state
+        this.forceGameRefresh();
         
         // Hide game container if it's showing
         document.querySelector('.game-container').classList.add('hidden');
@@ -4899,8 +4914,8 @@ class PinsGame {
             this.gameInterval = null;
         }
         
-        // Reset game state completely
-        this.resetGameState();
+        // Force complete refresh to clear everything
+        this.forceGameRefresh();
         
         // Hide game container and all modals
         document.querySelector('.game-container').classList.add('hidden');
@@ -5034,6 +5049,27 @@ class PinsGame {
         this.updateUI();
         
         console.log('Color refresh complete');
+    }
+
+    // Force complete game refresh - clears everything and reinitializes
+    forceGameRefresh() {
+        console.log('Force refreshing game...');
+        
+        // Clear SVG completely
+        const svg = document.getElementById('game-svg');
+        if (svg) {
+            svg.innerHTML = '';
+        }
+        
+        // Reset all game state
+        this.resetGameState();
+        
+        // Restore current settings if in a game
+        if (document.querySelector('.game-container:not(.hidden)')) {
+            this.initializeGame();
+        }
+        
+        console.log('Game refresh complete');
     }
 }
 
